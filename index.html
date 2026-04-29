@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Japón 🎌 Luna de Miel</title>
+
+<!-- PWA para iPhone -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Japón 🎌">
+<meta name="theme-color" content="#0D0D0B">
+
+<!-- Icono para pantalla de inicio iPhone -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230D0D0B'/%3E%3Ccircle cx='90' cy='90' r='45' fill='%23BC002D'/%3E%3Ctext x='90' y='56' text-anchor='middle' font-size='48' fill='white'%3E%F0%9F%8E%8C%3C/text%3E%3C/svg%3E">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{display:none}
+
+:root{
+  --bg:#0D0D0B;
+  --surface:rgba(255,255,255,.045);
+  --border:rgba(255,255,255,.07);
+  --text:#F0EDE6;
+  --text-dim:rgba(240,237,230,.42);
+  --text-faint:rgba(240,237,230,.25);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;overflow:hidden}
+
+/* ── LAYOUT ── */
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto}
+.header{flex-shrink:0;background:var(--bg);border-bottom:1px solid var(--border);padding-top:var(--safe-top)}
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.bottom-nav{flex-shrink:0;background:rgba(13,13,11,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding-bottom:var(--safe-bottom)}
+
+/* ── HEADER ── */
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 16px 0}
+.trip-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;line-height:1.1}
+.trip-dates{font-size:10px;color:var(--text-dim);margin-top:2px;letter-spacing:.07em;text-transform:uppercase}
+.view-btns{display:flex;gap:5px;margin-top:2px}
+.view-btn{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-size:11px;font-weight:500;padding:5px 10px;cursor:pointer;font-family:inherit;transition:all .18s}
+.view-btn.active{background:rgba(255,255,255,.12);color:var(--text);border-color:rgba(255,255,255,.18)}
+
+/* ── CITY TABS ── */
+.tab-scroll{display:flex;overflow-x:auto;gap:6px;padding:10px 14px 12px;scrollbar-width:none}
+.tab-btn{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:20px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;transition:all .22s;white-space:nowrap;color:rgba(240,237,230,.55);background:rgba(255,255,255,.07)}
+.tab-btn.active{color:#fff}
+
+/* ── CONTENT ── */
+.content{padding:14px 14px 20px}
+
+/* ── CITY INTRO ── */
+.city-intro{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.city-name{font-family:'Cormorant Garamond',serif;font-size:30px;font-style:italic;line-height:1}
+.city-dates-range{font-size:10px;color:var(--text-faint);margin-top:4px;letter-spacing:.05em;text-transform:uppercase}
+
+/* ── DAY CARDS ── */
+.day-card{background:var(--surface);border-radius:14px;margin-bottom:10px;overflow:hidden;border:1px solid var(--border)}
+.day-head{padding:13px 15px 9px}
+.day-date-row{display:flex;align-items:baseline;gap:8px}
+.day-num{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:400;line-height:1}
+.day-wd{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em}
+.day-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;margin-top:3px;color:var(--text)}
+.day-hotel{font-size:11px;color:var(--text-dim);margin-top:4px}
+.day-zone{font-size:10.5px;color:var(--text-faint);margin-top:2px}
+.pass-bar{margin:0 14px 8px;padding:7px 11px;border-radius:9px;font-size:11.5px;font-weight:500}
+.day-body{padding:0 15px 12px}
+
+/* ── ACTIVITIES ── */
+.act-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.045)}
+.act-row:last-child{border-bottom:none}
+.act-time{width:38px;flex-shrink:0;font-size:10.5px;color:var(--text-dim);font-weight:500;padding-top:3px;text-align:right;font-variant-numeric:tabular-nums}
+.act-icon{width:26px;flex-shrink:0;font-size:17px;text-align:center;line-height:1.45}
+.act-content{flex:1;min-width:0}
+.act-title{font-size:14px;font-weight:500;color:var(--text);line-height:1.3}
+.act-desc{font-size:12px;color:rgba(240,237,230,.5);margin-top:3px;line-height:1.5}
+.act-tip{font-size:11.5px;color:rgba(240,237,230,.38);margin-top:6px;font-style:italic;padding:6px 9px;background:rgba(255,255,255,.04);border-radius:7px;border-left:2px solid rgba(255,255,255,.14);line-height:1.4}
+.tag-res{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;background:rgba(196,81,42,.18);color:#F4A07A;border:1px solid rgba(196,81,42,.28);display:inline-block;margin-top:5px}
+.tag-urg{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;background:rgba(200,50,50,.2);color:#FF9090;border:1px solid rgba(200,50,50,.3);display:inline-block;margin-top:5px}
+
+/* ── BOTTOM NAV ── */
+.nav-items{display:flex;padding:6px 0 4px}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:rgba(240,237,230,.3);cursor:pointer;padding:5px 0;font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:500;transition:color .18s;letter-spacing:.01em}
+.nav-btn .nav-emoji{font-size:20px;line-height:1}
+
+/* ── BOOKINGS ── */
+.bookings-section{padding:4px 0}
+.bookings-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;margin-bottom:4px}
+.bookings-sub{font-size:12px;color:var(--text-dim);margin-bottom:16px;line-height:1.5}
+.booking-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border)}
+.booking-row:last-child{border-bottom:none}
+.booking-dot{font-size:20px;flex-shrink:0}
+.booking-info{flex:1}
+.booking-label{font-size:14px;font-weight:500;line-height:1.3}
+.booking-when{font-size:11.5px;color:var(--text-dim);margin-top:3px}
+.booking-status{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px}
+.status-high{background:rgba(200,50,50,.18);color:#FF9090;border:1px solid rgba(200,50,50,.28)}
+.status-med{background:rgba(200,160,50,.18);color:#E8C46A;border:1px solid rgba(200,160,50,.28)}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="trip-title">🎌 Luna de Miel · Japón</div>
+        <div class="trip-dates">22 Jun — 6 Jul · 2026</div>
+      </div>
+      <div class="view-btns">
+        <button class="view-btn active" id="btn-dias" onclick="setView('dias')">Días</button>
+        <button class="view-btn" id="btn-res" onclick="setView('reservas')">⚠ Reservas</button>
+      </div>
+    </div>
+    <div class="tab-scroll" id="tabs"></div>
+  </div>
+
+  <div class="scroll-area" id="scroll-area">
+    <div class="content" id="content"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-items" id="bottom-nav"></div>
+  </div>
+</div>
+
+<script>
+const TABS=[
+  {id:"vuelo",   label:"Vuelo",    emoji:"✈",  color:"#9A9690"},
+  {id:"tokyo1",  label:"Tokyo I",  emoji:"🗼", color:"#2E8EE8"},
+  {id:"kyoto",   label:"Kyoto",    emoji:"⛩", color:"#9080F0"},
+  {id:"osaka",   label:"Osaka",    emoji:"🔥", color:"#E86040"},
+  {id:"takayama",label:"Montaña",  emoji:"♨", color:"#30B882"},
+  {id:"tokyo2",  label:"Tokyo II", emoji:"🎌", color:"#4090D4"},
+];
+
+const DAYS=[
+  {c:"vuelo",d:"22 jun",w:"Lun",t:"Madrid → Tokyo",a:[
+    {h:"11:05",i:"✈",n:"Salida Madrid MAD",s:"Sichuan Airlines · 1 escala · ref. QDS276"},
+    {h:"",i:"💡",n:"Tip de vuelo",s:"Ajusta el reloj a UTC+9 desde el despegue y duerme todo lo que puedas."},
+  ]},
+  {c:"tokyo1",d:"23 jun",w:"Mar",t:"Llegada — Marunouchi",hotel:"Hotel JAL City Tokyo Toyosu",zone:"Marunouchi · Palacio Imperial",a:[
+    {h:"15:10",i:"✈",n:"Llegada Narita NRT",s:"Pasaportes · tarjeta Suica · cambio de divisa."},
+    {h:"17:00",i:"🏨",n:"Check-in Hotel Toyosu",s:"Dejar maletas y salir directo."},
+    {h:"17:30",i:"🚇",n:"Metro → Tokyo Station",s:"Línea Yūrakuchō · ~15 min."},
+    {h:"18:00",i:"🌸",n:"Kokyo Gaien",s:"Jardines exteriores del Palacio Imperial. El doble puente y los pinos centenarios."},
+    {h:"19:00",i:"🍽",n:"Cena en Marunouchi House",s:"Planta 7 del Shin-Marunouchi Bldg frente a Tokyo Station. Reserva recomendada.",tag:"res"},
+    {h:"21:00",i:"🚇",n:"Metro de vuelta a Toyosu",s:"A dormir — el jet lag pasará factura."},
+  ]},
+  {c:"kyoto",d:"24 jun",w:"Mié",t:"Tokyo → Kyoto",hotel:"Hotel Kyoto Karasuma Rokkaku",a:[
+    {h:"09:00",i:"🚄",n:"Shinkansen Nozomi",s:"Tokyo → Kyoto · ~2h15 · billete aparte."},
+    {h:"11:30",i:"🍱",n:"Nishiki Market",s:"A 2 min del hotel. Degustaciones de llegada."},
+    {h:"13:00",i:"🏨",n:"Check-in",s:"Hotel Kyoto Karasuma Rokkaku · hab. Executive king."},
+    {h:"15:00",i:"🏯",n:"Castillo Nijo-jo",s:"Suelos «ruiseñor» que rechinan. Jardines Edo."},
+    {h:"18:00",i:"🏮",n:"Gion + cena Pontocho",s:"Calles de madera del s.XVII. Cena bordeando el río Kamo."},
+  ]},
+  {c:"kyoto",d:"25 jun",w:"Jue",t:"Sur y este — templos",zone:"Fushimi → Higashiyama → Noroeste",a:[
+    {h:"06:30",i:"⛩",n:"Fushimi Inari",s:"Antes de las 7h. Miles de torii naranjas casi solos.",tip:"El tramo alto es el más mágico — lleva agua."},
+    {h:"09:00",i:"🛕",n:"Sanjusangendo",s:"1.001 guerreros Kannon dorados. Interior sin fotos — el más impresionante de Japón."},
+    {h:"11:00",i:"⛩",n:"Kiyomizu-dera",s:"El templo suspendido sobre el bosque. Vistas de Kyoto desde la terraza."},
+    {h:"12:30",i:"🏘",n:"Ninenzaka + Sannenzaka",s:"Bajada por calles de piedra. Artesanía, cerámica. Comer aquí."},
+    {h:"15:00",i:"✨",n:"Kinkaku-ji",s:"Pabellón de Oro. Taxi al noroeste."},
+    {h:"16:30",i:"🪨",n:"Ryoan-ji",s:"Jardín zen de las 15 piedras. A 10 min a pie."},
+    {h:"19:00",i:"🍶",n:"Cena kaiseki",s:"La alta cocina de Kyoto. Reserva con antelación.",tag:"res"},
+  ]},
+  {c:"kyoto",d:"26 jun",w:"Vie",t:"Nara · Uji",pass:"🎫 ACTIVAR JR WEST PASS",a:[
+    {h:"07:45",i:"🚂",n:"Tren a Nara",s:"JR Nara Line · 45 min · cubierto desde hoy."},
+    {h:"08:45",i:"🦌",n:"Nara Park",s:"1.300 ciervos sagrados sueltos. Compra shika sembei (galletas)."},
+    {h:"09:30",i:"🛕",n:"Todai-ji",s:"El mayor edificio de madera del mundo. Gran Buda de 15m."},
+    {h:"11:00",i:"⛩",n:"Kasuga Taisha",s:"3.000 linternas de piedra y bronce entre cedros milenarios."},
+    {h:"12:00",i:"🚂",n:"Tren a Uji",s:"JR Nara Line · ~40 min directo · JR West."},
+    {h:"13:00",i:"🍱",n:"Almuerzo en Uji",s:"Soba de té verde junto al río."},
+    {h:"14:30",i:"🍵",n:"Ceremonia del té — Taihoan",s:"Pabellón histórico en el parque Ujigawa. Tatami, jardín, sin masificación."},
+    {h:"15:45",i:"🏛",n:"Byodo-in",s:"Templo del s.XI UNESCO. La imagen de la moneda de 10 yenes."},
+    {h:"17:00",i:"🌊",n:"Paseo río Uji",s:"Matcha soft cream de despedida."},
+    {h:"18:00",i:"🚂",n:"Tren a Kyoto",s:"~20 min · JR West."},
+    {h:"19:30",i:"🍜",n:"Última cena en Kyoto",s:"Pontocho con vistas al río Kamo."},
+  ]},
+  {c:"osaka",d:"27 jun",w:"Sáb",t:"Kyoto → Osaka",hotel:"Mitsui Garden Hotel Osaka Premier",a:[
+    {h:"09:00",i:"🚄",n:"JR Kyoto → Osaka",s:"~20 min · JR West."},
+    {h:"10:00",i:"🏯",n:"Castillo de Osaka",s:"Jardines y museo interior."},
+    {h:"12:00",i:"🏨",n:"Check-in",s:"Mitsui Garden Osaka Premier · hab. Superior king, vistas al río."},
+    {h:"14:00",i:"🦑",n:"Dotonbori + Kuromon Ichiba",s:"Takoyaki, el Glico corriendo, marisco fresco."},
+    {h:"19:30",i:"🍢",n:"Cena en Shinsekai",s:"Kushikatsu — la fritura rebozada que inventó Osaka."},
+  ]},
+  {c:"osaka",d:"28 jun",w:"Dom",t:"Excursión: Naoshima",a:[
+    {h:"07:30",i:"🚄",n:"Osaka → Uno",s:"JR West · ~1h20."},
+    {h:"09:30",i:"⛴",n:"Ferry a Naoshima",s:"~20 min · ~¥290 aparte."},
+    {h:"10:00",i:"🎨",n:"Chichu Art Museum",s:"Monet, Turrell y De Maria bajo tierra. Cupo muy limitado.",tag:"urg"},
+    {h:"12:30",i:"🎨",n:"Art House Project + Yayoi Kusama",s:"Casas del pueblo intervenidas. Calabaza amarilla en el muelle. En bici."},
+    {h:"14:30",i:"🏛",n:"Benesse House Museum",s:"Arte y arquitectura integrados."},
+    {h:"17:00",i:"⛴",n:"Ferry + tren de vuelta",s:"Cena en Namba."},
+  ]},
+  {c:"osaka",d:"29 jun",w:"Lun",t:"Hiroshima + Miyajima",a:[
+    {h:"07:00",i:"🚄",n:"Shinkansen → Hiroshima",s:"~1h20 · JR West."},
+    {h:"08:30",i:"☮",n:"Parque Memorial de la Paz",s:"Cúpula Genbaku y Museo. 2h."},
+    {h:"11:00",i:"⛴",n:"Ferry a Miyajima",s:"Tren JR + ferry cubierto por JR West."},
+    {h:"11:45",i:"⛩",n:"Santuario Itsukushima",s:"Torii naranja flotante. Galería sobre el agua. Patrimonio UNESCO."},
+    {h:"13:00",i:"🛕",n:"Templo Daisho-in",s:"500 estatuas de monjes y campanillas en la falda del monte Misen."},
+    {h:"14:30",i:"🦌",n:"Ciervos + momiji manju",s:"Paseo por el puerto de la isla."},
+    {h:"16:00",i:"🚄",n:"Regreso a Osaka",s:"Última noche — okonomiyaki en Namba."},
+  ]},
+  {c:"takayama",d:"30 jun",w:"Mar",t:"Osaka → Kanazawa → Takayama",hotel:"Hida Takayama Onsen",a:[
+    {h:"06:00",i:"🏃",n:"Salida temprana",s:"Maletas al locker en estación de Osaka."},
+    {h:"07:00",i:"🚄",n:"Osaka → Kanazawa",s:"Hokuriku Shinkansen · ~2h15 · JR West."},
+    {h:"09:30",i:"🌿",n:"Kenroku-en + Castillo",s:"Uno de los 3 jardines más bellos de Japón. Contiguos."},
+    {h:"12:00",i:"🏘",n:"Nagamachi + Omicho Market",s:"Barrio samurai y mercado con el mejor marisco del Mar del Japón."},
+    {h:"14:30",i:"🍵",n:"Higashi Chaya",s:"Barrio de las geishas. Té en casa histórica."},
+    {h:"16:10",i:"🚌",n:"Bus → Takayama",s:"Nouhi Bus · ~2h30 · paisaje de montaña espectacular."},
+    {h:"18:45",i:"🏨",n:"Check-in Hida Takayama Onsen",s:"Hab. Doble Confort."},
+    {h:"20:00",i:"♨",n:"Onsen",s:"Primera sesión. Aguas termales, Alpes japoneses, silencio absoluto."},
+  ]},
+  {c:"takayama",d:"1 jul",w:"Mié",t:"Takayama + Shirakawa-go",a:[
+    {h:"07:00",i:"🏘",n:"Sanmachi Suji",s:"Barrio histórico vacío de mañana. Almacenes de sake del s.XVII."},
+    {h:"09:00",i:"🏛",n:"Takayama Jinya",s:"Única casa de gobierno feudal conservada en Japón."},
+    {h:"10:30",i:"🚌",n:"Bus a Shirakawa-go",s:"~50 min. Reserva online.",tag:"res"},
+    {h:"11:30",i:"🏔",n:"Shirakawa-go",s:"Aldea UNESCO. Casas gassho-zukuri. Mirador panorámico.",tip:"Las casas de paja son más impresionantes de cerca que en fotos."},
+    {h:"14:30",i:"🚌",n:"Bus de vuelta a Takayama",s:""},
+    {h:"18:00",i:"♨",n:"Onsen + cena en el ryokan",s:"La noche más especial de toda la luna de miel."},
+  ]},
+  {c:"tokyo2",d:"2 jul",w:"Jue",t:"Takayama → Tokyo",hotel:"Hotel JAL City Tokyo Toyosu",zone:"Asakusa · Skytree",a:[
+    {h:"06:30",i:"♨",n:"Onsen de despedida",s:"Las aguas solos a primera hora. El momento más tranquilo del viaje."},
+    {h:"08:00",i:"🍱",n:"Desayuno en el ryokan",s:"Check-out antes de las 10h."},
+    {h:"10:05",i:"🚂",n:"Hida Express → Nagoya",s:"JR Central · ~2h30 · billete aparte."},
+    {h:"12:40",i:"🚄",n:"Shinkansen → Tokyo",s:"Nozomi · ~1h40 · billete aparte."},
+    {h:"14:30",i:"🏨",n:"Check-in Hotel Toyosu",s:"Ducha y siesta corta."},
+    {h:"16:00",i:"⛩",n:"Senso-ji",s:"El templo más antiguo de Tokyo. Kaminarimon, Nakamise, incienso."},
+    {h:"17:30",i:"🗼",n:"Tokyo Skytree",s:"10 min de Senso-ji. 450m de vistas al atardecer."},
+    {h:"19:30",i:"🍣",n:"Cena en Asakusa",s:"Restaurantes tradicionales de alto nivel en la zona."},
+  ]},
+  {c:"tokyo2",d:"3 jul",w:"Vie",t:"Bahía · Akihabara · Shibuya",zone:"Hamarikyu → Akihabara → Toyosu → Shibuya → Shinjuku",a:[
+    {h:"09:00",i:"🌿",n:"Hamarikyu Gardens",s:"Jardín de los shogunes junto a la bahía. Caseta de té en isla interior."},
+    {h:"10:30",i:"🎮",n:"Akihabara",s:"Electrónica, anime, arcades. Zona de compras por excelencia."},
+    {h:"13:00",i:"🍱",n:"Comer en Akihabara",s:"O de camino de vuelta al hotel."},
+    {h:"14:30",i:"🏨",n:"Vuelta al hotel",s:"Dejar compras, cambiarse."},
+    {h:"16:00",i:"🎨",n:"TeamLab Planets",s:"5 min del hotel. Arte inmersivo acuático. Reservar pase de tarde.",tag:"res"},
+    {h:"18:00",i:"🚇",n:"Metro → Shibuya",s:"~40 min."},
+    {h:"19:00",i:"🌆",n:"Shibuya Sky",s:"Terraza a 229m con la ciudad iluminada. Última entrada 21:00.",tag:"res"},
+    {h:"21:00",i:"🍜",n:"Cena en Shinjuku",s:"Omoide Yokocho (yakitori) o izakaya."},
+  ]},
+  {c:"tokyo2",d:"4 jul",w:"Sáb",t:"Meiji · Harajuku · Shibuya · Shinjuku",zone:"Meiji → Harajuku → Shibuya → Shinjuku",a:[
+    {h:"09:00",i:"⛩",n:"Meiji Jingu",s:"Santuario en bosque de 100.000 árboles."},
+    {h:"11:00",i:"🍣",n:"Sushi en Shibuya",s:"Reserva si queréis omakase.",tag:"res"},
+    {h:"13:00",i:"🛍",n:"Harajuku + Omotesando",s:"Takeshita Street y boutiques de diseñadores japoneses."},
+    {h:"15:30",i:"🚦",n:"Shibuya Crossing",s:"El cruce más famoso del mundo. Foto desde el Starbucks de arriba."},
+    {h:"18:00",i:"🌃",n:"Mirador Ayuntamiento Metropolitano",s:"Gratis. Abre hasta las 23h. Las mejores vistas de Shinjuku."},
+    {h:"19:30",i:"🍢",n:"Cena en Shinjuku",s:"Golden Gai o izakaya del barrio."},
+    {h:"22:00",i:"🥂",n:"Copas en Shibuya",s:"Bar de cócteles o Golden Gai. La última noche."},
+    {h:"23:30",i:"🎤",n:"Karaoke",s:"Joysound o Big Echo en Shibuya. Sala privada. Hasta las 5h."},
+  ]},
+  {c:"tokyo2",d:"5 jul",w:"Dom",t:"Ueno · Vuelo a casa",zone:"Ueno → Narita",a:[
+    {h:"07:30",i:"🚇",n:"Metro a Ueno",s:"~20 min. Maletas al locker en Ueno Station."},
+    {h:"08:30",i:"🍱",n:"Desayuno en Ueno",s:""},
+    {h:"09:00",i:"🧘",n:"Meditación zazen + ceremonia del té",s:"Sesión con monje en templo de Ueno · 9:00 a 10:30.",tag:"urg"},
+    {h:"10:30",i:"🌸",n:"Parque Ueno",s:"Paseo tranquilo por el estanque Shinobazu."},
+    {h:"12:00",i:"🧳",n:"Recoger maletas del locker",s:"Última comida en Ueno si hay tiempo."},
+    {h:"12:30",i:"🚆",n:"Narita Express desde Ueno",s:"~55 min directo a Narita T1."},
+    {h:"16:40",i:"✈",n:"Vuelo NRT → MAD",s:"Sichuan Airlines · ref. QDS278."},
+  ]},
+  {c:"vuelo",d:"6 jul",w:"Lun",t:"Llegada Madrid",a:[
+    {h:"07:40",i:"🏠",n:"Aterrizaje Madrid MAD",s:"Fin del viaje de luna de miel. 🎌"},
+  ]},
+];
+
+const BOOKINGS=[
+  {n:"Chichu Art Museum, Naoshima",d:"28 jun",u:"high"},
+  {n:"TeamLab Planets (pase tarde)",d:"3 jul",u:"high"},
+  {n:"Shibuya Sky",d:"3 jul",u:"high"},
+  {n:"Actividad monje / zazen, Ueno",d:"5 jul",u:"high"},
+  {n:"Bus Takayama → Shirakawa-go",d:"1 jul",u:"med"},
+  {n:"Cena kaiseki en Kyoto",d:"25 jun",u:"med"},
+  {n:"Sushi omakase en Shibuya",d:"4 jul",u:"med"},
+  {n:"Marunouchi House (recomendable)",d:"23 jun",u:"med"},
+];
+
+// ─── STATE ───────────────────────────────────────
+let tab="tokyo1", view="dias";
+
+// ─── RENDER TABS ─────────────────────────────────
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=TABS.map(t=>`
+    <button class="tab-btn${tab===t.id?" active":""}" onclick="go('${t.id}')"
+      style="${tab===t.id?`background:${t.color};box-shadow:0 3px 14px ${t.color}44;color:#fff`:""}"
+    >${t.emoji} ${t.label}</button>
+  `).join("");
+}
+
+// ─── RENDER BOTTOM NAV ───────────────────────────
+function renderNav(){
+  document.getElementById("bottom-nav").innerHTML=TABS.map(t=>`
+    <button class="nav-btn" onclick="go('${t.id}')" style="${tab===t.id&&view==="dias"?`color:${t.color}`:""}">
+      <span class="nav-emoji">${t.emoji}</span>${t.label}
+    </button>
+  `).join("");
+}
+
+// ─── RENDER CONTENT ──────────────────────────────
+function renderContent(){
+  const el=document.getElementById("content");
+  if(view==="reservas"){
+    el.innerHTML=`
+      <div class="bookings-section">
+        <div class="bookings-title">Reservas pendientes</div>
+        <div class="bookings-sub">Hazlas con antelación — algunas tienen cupo muy limitado.</div>
+        ${BOOKINGS.map(b=>`
+          <div class="booking-row">
+            <div class="booking-dot">${b.u==="high"?"🔴":"🟡"}</div>
+            <div class="booking-info">
+              <div class="booking-label">${b.n}</div>
+              <div class="booking-when">${b.d}</div>
+              <span class="booking-status ${b.u==="high"?"status-high":"status-med"}">${b.u==="high"?"Urgente":"Recomendable"}</span>
+            </div>
+          </div>
+        `).join("")}
+      </div>`;
+    return;
+  }
+  const T=TABS.find(t=>t.id===tab);
+  const days=DAYS.filter(d=>d.c===tab);
+  el.innerHTML=`
+    <div class="city-intro">
+      <div class="city-name" style="color:${T.color}">${T.emoji} ${T.label}</div>
+      <div class="city-dates-range">${days.map(d=>d.d).join("  ·  ")}</div>
+    </div>
+    ${days.map(day=>`
+      <div class="day-card">
+        <div class="day-head">
+          <div class="day-date-row">
+            <div class="day-num" style="color:${T.color}">${day.d}</div>
+            <div class="day-wd">${day.w}</div>
+          </div>
+          <div class="day-title">${day.t}</div>
+          ${day.hotel?`<div class="day-hotel">🏨 ${day.hotel}</div>`:""}
+          ${day.zone?`<div class="day-zone">📍 ${day.zone}</div>`:""}
+        </div>
+        ${day.pass?`<div class="pass-bar" style="background:${T.color}20;border-left:3px solid ${T.color};color:${T.color}">${day.pass}</div>`:""}
+        <div class="day-body">
+          ${day.a.map(a=>`
+            <div class="act-row">
+              <div class="act-time">${a.h}</div>
+              <div class="act-icon">${a.i}</div>
+              <div class="act-content">
+                <div class="act-title">${a.n}</div>
+                ${a.s?`<div class="act-desc">${a.s}</div>`:""}
+                ${a.tip?`<div class="act-tip">${a.tip}</div>`:""}
+                ${a.tag==="res"?`<span class="tag-res">Reservar</span>`:""}
+                ${a.tag==="urg"?`<span class="tag-urg">⚠ Reservar urgente</span>`:""}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `).join("")}`;
+}
+
+// ─── ACTIONS ─────────────────────────────────────
+function go(id){tab=id;view="dias";render();}
+function setView(v){
+  view=v;
+  document.getElementById("btn-dias").classList.toggle("active",v==="dias");
+  document.getElementById("btn-res").classList.toggle("active",v==="reservas");
+  render();
+}
+function render(){
+  renderTabs();renderNav();renderContent();
+  document.getElementById("scroll-area").scrollTop=0;
+}
+
+render();
+</script>
+</body>
+</html>
