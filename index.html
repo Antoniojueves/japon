@@ -59,9 +59,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .nav-items{display:flex;padding:5px 0 3px}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:rgba(240,237,230,.3);cursor:pointer;padding:4px 0;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;transition:color .18s}
 .ne{font-size:19px;line-height:1.2}
-/* BOOKINGS */
 .sec-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;margin-bottom:4px}
 .sec-sub{font-size:12px;color:var(--dim);margin-bottom:16px;line-height:1.5}
+/* BOOKINGS */
 .br{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer}
 .br:last-child{border-bottom:none}
 .bchk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--dim);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:all .2s;color:transparent}
@@ -70,22 +70,28 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .bl{font-size:14px;font-weight:500;line-height:1.3;transition:color .2s}
 .bl.done{color:var(--dim);text-decoration:line-through}
 .bw{font-size:11px;color:var(--dim);margin-top:2px}
-.bn{font-size:11.5px;color:rgba(240,237,230,.45);margin-top:4px;line-height:1.4}
+.bn{font-size:11.5px;color:rgba(240,237,230,.42);margin-top:4px;line-height:1.4}
 .bb{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:5px}
 .bh{background:rgba(200,50,50,.18);color:#FF9090;border:1px solid rgba(200,50,50,.28)}
 .bm{background:rgba(200,160,50,.18);color:#E8C46A;border:1px solid rgba(200,160,50,.28)}
 .bf{background:rgba(50,120,200,.18);color:#90C0FF;border:1px solid rgba(50,120,200,.28)}
 /* PHOTOS */
 .photo-card{border-radius:14px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);background:var(--surface)}
-.piw{position:relative;width:100%;padding-top:56%;overflow:hidden;background:#1a1a17}
-.piw img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
-.pif{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px}
+.piw{position:relative;width:100%;padding-top:56%;overflow:hidden;background:#1a1a17;display:flex;align-items:center;justify-content:center}
+.pif{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px;transition:opacity .3s}
+.pimg{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
+.pimg.loaded{opacity:1}
 .pinfo{padding:12px 14px}
 .pname{font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;line-height:1.2}
 .psub{font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.4}
 .pmeta{display:flex;align-items:center;gap:7px;margin-top:8px}
 .pcity{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px}
 .pdate{font-size:10px;color:var(--faint)}
+.loading-dots{display:flex;gap:4px;align-items:center;justify-content:center;height:100%}
+.loading-dots span{width:5px;height:5px;border-radius:50%;background:rgba(240,237,230,.25);animation:dot 1.2s infinite ease-in-out}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
@@ -99,7 +105,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
       <div class="vbtns">
         <button class="vbtn active" id="vd" onclick="setView('dias')">Días</button>
         <button class="vbtn" id="vr" onclick="setView('reservas')">⚠ Reservas</button>
-        <button class="vbtn" id="vf" onclick="setView('fotos')">📸</button>
+        <button class="vbtn" id="vf" onclick="setView('fotos')">📸 Fotos</button>
       </div>
     </div>
     <div class="tab-scroll" id="tabs"></div>
@@ -113,7 +119,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 </div>
 
 <script>
-// ── TORII ICON ──────────────────────────────────────────────
+// ── TORII ICON (canvas-rendered PNG) ──────────────────────
 (function(){
   const c=document.createElement('canvas');c.width=180;c.height=180;
   const x=c.getContext('2d');
@@ -121,27 +127,25 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
   x.moveTo(r,0);x.lineTo(w-r,0);x.quadraticCurveTo(w,0,w,r);
   x.lineTo(w,h-r);x.quadraticCurveTo(w,h,w-r,h);
   x.lineTo(r,h);x.quadraticCurveTo(0,h,0,h-r);
-  x.lineTo(0,r);x.quadraticCurveTo(0,0,r,0);
-  x.closePath();x.fillStyle='#0D0D0B';x.fill();
+  x.lineTo(0,r);x.quadraticCurveTo(0,0,r,0);x.closePath();
+  x.fillStyle='#0D0D0B';x.fill();
   const g=x.createRadialGradient(90,80,10,90,80,90);
-  g.addColorStop(0,'rgba(188,0,45,0.15)');g.addColorStop(1,'transparent');
+  g.addColorStop(0,'rgba(188,0,45,0.18)');g.addColorStop(1,'transparent');
   x.fillStyle=g;x.beginPath();x.rect(0,0,180,180);x.fill();
   x.fillStyle='#BC002D';
-  // kasagi
-  x.beginPath();x.moveTo(12,64);x.quadraticCurveTo(90,26,168,64);x.lineTo(164,77);x.quadraticCurveTo(90,40,16,77);x.closePath();x.fill();
-  // shimagi highlight
+  x.beginPath();x.moveTo(12,64);x.quadraticCurveTo(90,26,168,64);
+  x.lineTo(164,77);x.quadraticCurveTo(90,40,16,77);x.closePath();x.fill();
   x.fillStyle='rgba(255,100,80,0.22)';
-  x.beginPath();x.moveTo(12,64);x.quadraticCurveTo(90,26,168,64);x.lineTo(166,57);x.quadraticCurveTo(90,20,14,57);x.closePath();x.fill();
+  x.beginPath();x.moveTo(12,64);x.quadraticCurveTo(90,26,168,64);
+  x.lineTo(166,57);x.quadraticCurveTo(90,20,14,57);x.closePath();x.fill();
   x.fillStyle='#BC002D';
-  // nuki
   x.beginPath();if(x.roundRect)x.roundRect(36,94,108,10,3);else x.rect(36,94,108,10);x.fill();
-  // pillars
   x.beginPath();if(x.roundRect)x.roundRect(52,76,14,80,3);else x.rect(52,76,14,80);x.fill();
   x.beginPath();if(x.roundRect)x.roundRect(114,76,14,80,3);else x.rect(114,76,14,80);x.fill();
   document.getElementById('app-icon').href=c.toDataURL('image/png');
 })();
 
-// ── TABS DATA ───────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────────
 const TABS=[
   {id:"vuelo",   label:"Vuelo",   emoji:"✈",  color:"#9A9690"},
   {id:"tokyo1",  label:"Tokyo I", emoji:"🗼", color:"#2E8EE8"},
@@ -151,7 +155,7 @@ const TABS=[
   {id:"tokyo2",  label:"Tokyo II",emoji:"🎌", color:"#4090D4"},
 ];
 
-// ── ITINERARY ───────────────────────────────────────────────
+// ── ITINERARY ─────────────────────────────────────────────
 const DAYS=[
   {c:"vuelo",d:"22 jun",w:"Lun",t:"Madrid → Tokyo",a:[
     {h:"11:05",i:"✈",n:"Salida Madrid MAD",s:"Sichuan Airlines · 1 escala · ref. QDS276"},
@@ -175,7 +179,7 @@ const DAYS=[
   {c:"kyoto",d:"25 jun",w:"Jue",t:"Sur y este — templos",zone:"Fushimi → Higashiyama → Noroeste",a:[
     {h:"06:30",i:"⛩",n:"Fushimi Inari",s:"Antes de las 7h. Miles de torii naranjas casi solos.",tip:"El tramo alto es el más mágico — lleva agua."},
     {h:"09:00",i:"🛕",n:"Sanjusangendo",s:"1.001 guerreros Kannon dorados. Interior sin fotos."},
-    {h:"11:00",i:"⛩",n:"Kiyomizu-dera",s:"El templo suspendido sobre el bosque. Vistas de Kyoto desde la terraza."},
+    {h:"11:00",i:"⛩",n:"Kiyomizu-dera",s:"El templo suspendido sobre el bosque. Vistas de Kyoto."},
     {h:"12:30",i:"🏘",n:"Ninenzaka + Sannenzaka",s:"Bajada por calles de piedra. Artesanía y cerámica. Comer aquí."},
     {h:"15:00",i:"✨",n:"Kinkaku-ji",s:"Pabellón de Oro. Taxi al noroeste."},
     {h:"16:30",i:"🪨",n:"Ryoan-ji",s:"Jardín zen de las 15 piedras. A 10 min a pie."},
@@ -185,10 +189,10 @@ const DAYS=[
     {h:"07:45",i:"🚂",n:"Tren a Nara",s:"JR Nara Line · 45 min · cubierto desde hoy."},
     {h:"08:45",i:"🦌",n:"Nara Park",s:"1.300 ciervos sagrados sueltos. Compra shika sembei."},
     {h:"09:30",i:"🛕",n:"Todai-ji",s:"El mayor edificio de madera del mundo. Gran Buda de 15m."},
-    {h:"11:00",i:"⛩",n:"Kasuga Taisha",s:"3.000 linternas de piedra y bronce entre cedros milenarios."},
-    {h:"12:00",i:"🚂",n:"Tren a Uji",s:"JR Nara Line · ~40 min directo · JR West."},
+    {h:"11:00",i:"⛩",n:"Kasuga Taisha",s:"3.000 linternas de piedra y bronce entre cedros."},
+    {h:"12:00",i:"🚂",n:"Tren a Uji",s:"JR Nara Line · ~40 min · JR West."},
     {h:"13:00",i:"🍱",n:"Almuerzo en Uji",s:"Soba de té verde junto al río."},
-    {h:"14:30",i:"🍵",n:"Ceremonia del té — Taihoan",s:"Pabellón histórico en el parque Ujigawa. Tatami, jardín, sin masificación."},
+    {h:"14:30",i:"🍵",n:"Ceremonia del té — Taihoan",s:"Pabellón histórico en el parque Ujigawa. Tatami, jardín."},
     {h:"15:45",i:"🏛",n:"Byodo-in",s:"Templo del s.XI UNESCO. La imagen de la moneda de 10 yenes."},
     {h:"17:00",i:"🌊",n:"Paseo río Uji",s:"Matcha soft cream de despedida."},
     {h:"18:00",i:"🚂",n:"Tren a Kyoto",s:"~20 min · JR West."},
@@ -197,26 +201,26 @@ const DAYS=[
   {c:"osaka",d:"27 jun",w:"Sáb",t:"Kyoto → Osaka",hotel:"Mitsui Garden Hotel Osaka Premier",a:[
     {h:"09:00",i:"🚄",n:"JR Kyoto → Osaka",s:"~20 min · JR West."},
     {h:"10:00",i:"🏯",n:"Castillo de Osaka",s:"Jardines y museo interior."},
-    {h:"12:00",i:"🏨",n:"Check-in",s:"Mitsui Garden Osaka Premier · hab. Superior king, vistas al río."},
+    {h:"12:00",i:"🏨",n:"Check-in",s:"Mitsui Garden Osaka Premier · hab. Superior king."},
     {h:"14:00",i:"🦑",n:"Dotonbori + Kuromon Ichiba",s:"Takoyaki, el Glico corriendo, marisco fresco."},
     {h:"19:30",i:"🍢",n:"Cena en Shinsekai",s:"Kushikatsu — la fritura rebozada que inventó Osaka."},
   ]},
   {c:"osaka",d:"28 jun",w:"Dom",t:"Excursión: Naoshima",a:[
     {h:"07:30",i:"🚄",n:"Osaka → Uno",s:"JR West · ~1h20."},
-    {h:"09:30",i:"⛴",n:"Ferry Uno → Naoshima",s:"~20 min · ~¥290 aparte. Confirmar horarios.",tag:"r"},
-    {h:"10:00",i:"🎨",n:"Chichu Art Museum",s:"Monet, Turrell y De Maria bajo tierra. Cupo muy limitado.",tag:"u"},
-    {h:"12:30",i:"🎨",n:"Art House Project + Yayoi Kusama",s:"Casas del pueblo intervenidas. Calabaza amarilla en el muelle."},
+    {h:"09:30",i:"⛴",n:"Ferry Uno → Naoshima",s:"~20 min · ~¥290 aparte.",tag:"r"},
+    {h:"10:00",i:"🎨",n:"Chichu Art Museum",s:"Monet, Turrell y De Maria bajo tierra.",tag:"u"},
+    {h:"12:30",i:"🎨",n:"Art House Project + Yayoi Kusama",s:"Casas intervenidas por artistas. Calabaza amarilla en el muelle."},
     {h:"14:30",i:"🏛",n:"Benesse House Museum",s:"Arte y arquitectura integrados."},
-    {h:"17:00",i:"⛴",n:"Ferry Naoshima → Uno + tren a Osaka",s:"Cena en Namba.",tag:"r"},
+    {h:"17:00",i:"⛴",n:"Ferry Naoshima → Uno + tren",s:"Cena en Namba.",tag:"r"},
   ]},
   {c:"osaka",d:"29 jun",w:"Lun",t:"Hiroshima + Miyajima",a:[
     {h:"07:00",i:"🚄",n:"Shinkansen Osaka → Hiroshima",s:"JR West · ~1h20. Reservar asiento.",tag:"r"},
     {h:"08:30",i:"☮",n:"Parque Memorial de la Paz",s:"Cúpula Genbaku y Museo. 2h."},
     {h:"11:00",i:"⛴",n:"Ferry a Miyajima",s:"Tren JR + ferry cubierto por JR West."},
-    {h:"11:45",i:"⛩",n:"Santuario Itsukushima",s:"Torii naranja flotante. Galería sobre el agua. Patrimonio UNESCO."},
-    {h:"13:00",i:"🛕",n:"Templo Daisho-in",s:"500 estatuas de monjes y campanillas en la falda del monte Misen."},
+    {h:"11:45",i:"⛩",n:"Santuario Itsukushima",s:"Torii naranja flotante. Galería sobre el agua. UNESCO."},
+    {h:"13:00",i:"🛕",n:"Templo Daisho-in",s:"500 estatuas de monjes y campanillas en el monte Misen."},
     {h:"14:30",i:"🦌",n:"Ciervos + momiji manju",s:"Paseo por el puerto de la isla."},
-    {h:"16:00",i:"🚄",n:"Shinkansen Hiroshima → Osaka",s:"JR West · ~1h20. Reservar asiento de vuelta.",tag:"r"},
+    {h:"16:00",i:"🚄",n:"Shinkansen Hiroshima → Osaka",s:"JR West. Reservar asiento.",tag:"r"},
   ]},
   {c:"takayama",d:"30 jun",w:"Mar",t:"Osaka → Kanazawa → Takayama",hotel:"Hida Takayama Onsen",a:[
     {h:"06:00",i:"🏃",n:"Salida temprana",s:"Maletas al locker en estación de Osaka."},
@@ -229,10 +233,10 @@ const DAYS=[
     {h:"20:00",i:"♨",n:"Onsen",s:"Primera sesión. Alpes japoneses, silencio absoluto."},
   ]},
   {c:"takayama",d:"1 jul",w:"Mié",t:"Takayama + Shirakawa-go",a:[
-    {h:"07:00",i:"🏘",n:"Sanmachi Suji",s:"Barrio histórico vacío de mañana. Almacenes de sake del s.XVII."},
+    {h:"07:00",i:"🏘",n:"Sanmachi Suji",s:"Barrio histórico vacío de mañana. Sake del s.XVII."},
     {h:"09:00",i:"🏛",n:"Takayama Jinya",s:"Única casa de gobierno feudal conservada en Japón."},
     {h:"10:30",i:"🚌",n:"Bus a Shirakawa-go",s:"~50 min. Reserva online.",tag:"r"},
-    {h:"11:30",i:"🏔",n:"Shirakawa-go",s:"Aldea UNESCO. Casas gassho-zukuri. Mirador panorámico.",tip:"Las casas de paja son más impresionantes de cerca que en fotos."},
+    {h:"11:30",i:"🏔",n:"Shirakawa-go",s:"Aldea UNESCO. Casas gassho-zukuri. Mirador panorámico.",tip:"Las casas de paja son más impresionantes de cerca."},
     {h:"14:30",i:"🚌",n:"Bus de vuelta a Takayama",s:""},
     {h:"18:00",i:"♨",n:"Onsen + cena en el ryokan",s:"La noche más especial de toda la luna de miel."},
   ]},
@@ -242,12 +246,12 @@ const DAYS=[
     {h:"10:05",i:"🚂",n:"Hida Express → Nagoya",s:"JR Central · ~2h30 · billete aparte."},
     {h:"12:40",i:"🚄",n:"Shinkansen → Tokyo",s:"Nozomi · ~1h40 · billete aparte."},
     {h:"14:30",i:"🏨",n:"Check-in Hotel Toyosu",s:"Ducha y siesta corta."},
-    {h:"16:00",i:"⛩",n:"Senso-ji",s:"El templo más antiguo de Tokyo. Kaminarimon, Nakamise, incienso."},
-    {h:"17:30",i:"🗼",n:"Tokyo Skytree",s:"10 min de Senso-ji. 450m de vistas al atardecer. Reservar entrada online.",tag:"r"},
-    {h:"19:30",i:"🍣",n:"Cena en Asakusa",s:"Restaurantes tradicionales de alto nivel en la zona."},
+    {h:"16:00",i:"⛩",n:"Senso-ji",s:"El templo más antiguo de Tokyo. Kaminarimon, Nakamise."},
+    {h:"17:30",i:"🗼",n:"Tokyo Skytree",s:"10 min de Senso-ji. 450m de vistas. Reservar online.",tag:"r"},
+    {h:"19:30",i:"🍣",n:"Cena en Asakusa",s:"Restaurantes tradicionales en la zona."},
   ]},
-  {c:"tokyo2",d:"3 jul",w:"Vie",t:"Bahía · Akihabara · Shibuya",zone:"Hamarikyu → Akihabara → Toyosu → Shibuya → Shinjuku",a:[
-    {h:"09:00",i:"🌿",n:"Hamarikyu Gardens",s:"Jardín de los shogunes junto a la bahía. Caseta de té en isla interior."},
+  {c:"tokyo2",d:"3 jul",w:"Vie",t:"Bahía · Akihabara · Shibuya",zone:"Hamarikyu → Akihabara → Toyosu → Shibuya",a:[
+    {h:"09:00",i:"🌿",n:"Hamarikyu Gardens",s:"Jardín de los shogunes junto a la bahía."},
     {h:"10:30",i:"🎮",n:"Akihabara",s:"Electrónica, anime, arcades. Zona de compras."},
     {h:"13:00",i:"🍱",n:"Comer en Akihabara",s:"O de camino de vuelta al hotel."},
     {h:"14:30",i:"🏨",n:"Vuelta al hotel",s:"Dejar compras, cambiarse."},
@@ -259,11 +263,11 @@ const DAYS=[
   {c:"tokyo2",d:"4 jul",w:"Sáb",t:"Meiji · Harajuku · Shibuya · Shinjuku",zone:"Meiji → Harajuku → Shibuya → Shinjuku",a:[
     {h:"09:00",i:"⛩",n:"Meiji Jingu",s:"Santuario en bosque de 100.000 árboles."},
     {h:"11:00",i:"🍣",n:"Sushi en Shibuya",s:"Reserva si queréis omakase.",tag:"r"},
-    {h:"13:00",i:"🛍",n:"Harajuku + Omotesando",s:"Takeshita Street y boutiques de diseñadores japoneses."},
-    {h:"15:30",i:"🚦",n:"Shibuya Crossing",s:"El cruce más famoso del mundo. Foto desde el Starbucks de arriba."},
-    {h:"18:00",i:"🌃",n:"Mirador Ayuntamiento Metropolitano",s:"Gratis. Abre hasta las 23h. Las mejores vistas de Shinjuku."},
+    {h:"13:00",i:"🛍",n:"Harajuku + Omotesando",s:"Takeshita Street y boutiques de diseño japonés."},
+    {h:"15:30",i:"🚦",n:"Shibuya Crossing",s:"El cruce más famoso del mundo."},
+    {h:"18:00",i:"🌃",n:"Mirador Ayuntamiento Metropolitano",s:"Gratis. Abre hasta las 23h."},
     {h:"19:30",i:"🍢",n:"Cena en Shinjuku",s:"Golden Gai o izakaya del barrio."},
-    {h:"22:00",i:"🥂",n:"Copas en Shibuya",s:"Bar de cócteles o Golden Gai. La última noche."},
+    {h:"22:00",i:"🥂",n:"Copas en Shibuya",s:"Bar de cócteles o Golden Gai."},
     {h:"23:30",i:"🎤",n:"Karaoke",s:"Joysound o Big Echo en Shibuya. Sala privada. Hasta las 5h."},
   ]},
   {c:"tokyo2",d:"5 jul",w:"Dom",t:"Ueno · Vuelo a casa",zone:"Ueno → Narita",a:[
@@ -280,10 +284,10 @@ const DAYS=[
   ]},
 ];
 
-// ── BOOKINGS ────────────────────────────────────────────────
+// ── BOOKINGS ─────────────────────────────────────────────
 const BOOKINGS=[
   {id:"b0",n:"Comprar JR West Rail Pass (7 días)",d:"Antes del viaje",u:"h",
-   note:"Activar el 26 jun en Kyoto. Comprar en jrpass.com o en Japón al llegar."},
+   note:"Activar el 26 jun en Kyoto. Comprar en jrpass.com o al llegar a Japón."},
   {id:"b1",n:"Chichu Art Museum, Naoshima",d:"28 jun",u:"h",
    note:"Cupo muy limitado. Reservar en chichu.jp semanas antes."},
   {id:"b2",n:"TeamLab Planets (pase de tarde)",d:"3 jul",u:"h",
@@ -295,7 +299,7 @@ const BOOKINGS=[
   {id:"b5",n:"Tokyo Skytree (entrada)",d:"2 jul",u:"h",
    note:"Reservar online en tokyo-skytree.jp para evitar colas."},
   {id:"b6",n:"Asiento Shinkansen Osaka → Hiroshima",d:"29 jun",u:"m",
-   note:"Cubierto por JR West Pass. Reservar asiento (libre o en taquilla JR)."},
+   note:"Cubierto por JR West Pass. Reservar asiento gratis en taquilla JR."},
   {id:"b7",n:"Asiento Shinkansen Hiroshima → Osaka",d:"29 jun",u:"m",
    note:"Cubierto por JR West Pass. Reservar asiento de vuelta."},
   {id:"b8",n:"Bus Takayama ↔ Shirakawa-go",d:"1 jul",u:"m",
@@ -303,75 +307,55 @@ const BOOKINGS=[
   {id:"b9",n:"Cena kaiseki en Kyoto",d:"25 jun",u:"m",
    note:"Reservar con 2-3 semanas de antelación. Zona Pontocho o Gion."},
   {id:"b10",n:"Sushi omakase en Shibuya",d:"4 jul",u:"m",
-   note:"Si queréis omakase reservar 1-2 semanas antes en Tableall."},
+   note:"Reservar 1-2 semanas antes en Tableall si queréis omakase."},
   {id:"b11",n:"Marunouchi House (primera cena)",d:"23 jun",u:"f",
    note:"Recomendable reservar restaurante concreto del complejo."},
+  {id:"b12",n:"Tren Osaka → Uno (ida a Naoshima)",d:"28 jun",u:"m",
+   note:"JR West Pass cubre el trayecto. Salir a las 07:30 desde Osaka. Tren JR Ako Line o Okayama + Uno."},
+  {id:"b13",n:"Tren Uno → Osaka (vuelta de Naoshima)",d:"28 jun",u:"m",
+   note:"JR West Pass cubre el trayecto de vuelta desde Uno. Confirmar horarios del último tren."},
+  {id:"b14",n:"Shinkansen Osaka → Kanazawa",d:"30 jun",u:"m",
+   note:"Hokuriku Shinkansen · cubierto por JR West Pass. Reservar asiento en taquilla JR para el tren de las 07:00."},
 ];
 
-// ── PHOTOS ──────────────────────────────────────────────────
+// ── PHOTOS — usa títulos de Wikipedia para obtener imágenes reales ──
 const PHOTOS=[
-  {n:"Kokyo Gaien",s:"Jardines del Palacio Imperial",d:"23 jun",c:"tokyo1",e:"🌸",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Tokyo_Imperial_Palace_December_2021.jpg/800px-Tokyo_Imperial_Palace_December_2021.jpg"},
-  {n:"Nishiki Market",s:"El mercado cubierto de Kyoto",d:"24 jun",c:"kyoto",e:"🍱",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Nishiki_Ichiba_5447.jpg/800px-Nishiki_Ichiba_5447.jpg"},
-  {n:"Castillo Nijo-jo",s:"Los suelos «ruiseñor» de Kyoto",d:"24 jun",c:"kyoto",e:"🏯",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/NijoCastle01.JPG/800px-NijoCastle01.JPG"},
-  {n:"Fushimi Inari",s:"Miles de torii naranjas en el bosque",d:"25 jun",c:"kyoto",e:"⛩",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Fushimi_Inari_Taisha.jpg/800px-Fushimi_Inari_Taisha.jpg"},
-  {n:"Kiyomizu-dera",s:"El templo suspendido sobre el bosque",d:"25 jun",c:"kyoto",e:"⛩",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Kiyomizu-dera_Nov2012.jpg/800px-Kiyomizu-dera_Nov2012.jpg"},
-  {n:"Kinkaku-ji",s:"El Pabellón de Oro de Kyoto",d:"25 jun",c:"kyoto",e:"✨",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Kinkakuji_2009.jpg/800px-Kinkakuji_2009.jpg"},
-  {n:"Ryoan-ji",s:"El jardín zen de las 15 piedras",d:"25 jun",c:"kyoto",e:"🪨",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Ryoan-ji_rock_garden_2.jpg/800px-Ryoan-ji_rock_garden_2.jpg"},
-  {n:"Nara Park",s:"Los ciervos sagrados de Nara",d:"26 jun",c:"kyoto",e:"🦌",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Nara_Deer.jpg/800px-Nara_Deer.jpg"},
-  {n:"Todai-ji",s:"El Gran Buda de 15 metros",d:"26 jun",c:"kyoto",e:"🛕",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Todaiji1.jpg/800px-Todaiji1.jpg"},
-  {n:"Byodo-in, Uji",s:"El templo de la moneda de 10 yenes",d:"26 jun",c:"kyoto",e:"🏛",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Byodo-in_in_Uji.jpg/800px-Byodo-in_in_Uji.jpg"},
-  {n:"Castillo de Osaka",s:"El corazón histórico de Osaka",d:"27 jun",c:"osaka",e:"🏯",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Osaka_Castle_in_2019.jpg/800px-Osaka_Castle_in_2019.jpg"},
-  {n:"Dotonbori",s:"El caos más divertido de Japón",d:"27 jun",c:"osaka",e:"🦑",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Dotonbori_Osaka_November_2016.jpg/800px-Dotonbori_Osaka_November_2016.jpg"},
-  {n:"Naoshima — Isla del Arte",s:"Arte contemporáneo en el Mar Interior",d:"28 jun",c:"osaka",e:"🎨",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Naoshima-pumpkin.jpg/800px-Naoshima-pumpkin.jpg"},
-  {n:"Hiroshima — Parque Memorial",s:"El símbolo más poderoso de la paz",d:"29 jun",c:"osaka",e:"☮",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Hiroshima_Peace_Memorial.jpg/800px-Hiroshima_Peace_Memorial.jpg"},
-  {n:"Miyajima — Torii flotante",s:"El santuario sobre el agua",d:"29 jun",c:"osaka",e:"⛩",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Miyajima_torii_reflection.jpg/800px-Miyajima_torii_reflection.jpg"},
-  {n:"Kenroku-en, Kanazawa",s:"Uno de los 3 jardines más bellos de Japón",d:"30 jun",c:"takayama",e:"🌿",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Kenrokuen_winter.jpg/800px-Kenrokuen_winter.jpg"},
-  {n:"Nagamachi",s:"El barrio samurai de Kanazawa",d:"30 jun",c:"takayama",e:"🏘",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Nagamachi_Kanazawa.jpg/800px-Nagamachi_Kanazawa.jpg"},
-  {n:"Shirakawa-go",s:"La aldea UNESCO con tejados de paja",d:"1 jul",c:"takayama",e:"🏔",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Shirakawa-go_Village_in_2009.jpg/800px-Shirakawa-go_Village_in_2009.jpg"},
-  {n:"Senso-ji, Asakusa",s:"El templo más antiguo de Tokyo",d:"2 jul",c:"tokyo2",e:"⛩",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Senso-ji_overhead.jpg/800px-Senso-ji_overhead.jpg"},
-  {n:"Tokyo Skytree",s:"450 metros sobre la metrópolis",d:"2 jul",c:"tokyo2",e:"🗼",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Tokyo_Sky_Tree_2012.JPG/800px-Tokyo_Sky_Tree_2012.JPG"},
-  {n:"Hamarikyu Gardens",s:"El jardín de los shogunes junto a la bahía",d:"3 jul",c:"tokyo2",e:"🌿",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Hamarikyu_Gardens_Tokyo.jpg/800px-Hamarikyu_Gardens_Tokyo.jpg"},
-  {n:"Akihabara",s:"La meca del anime y la electrónica",d:"3 jul",c:"tokyo2",e:"🎮",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Akihabara_district_2006.jpg/800px-Akihabara_district_2006.jpg"},
-  {n:"Shibuya Sky",s:"Tokyo iluminada a 229 metros de altura",d:"3 jul",c:"tokyo2",e:"🌆",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Shibuya_from_above_2019.jpg/800px-Shibuya_from_above_2019.jpg"},
-  {n:"Meiji Jingu",s:"El santuario en el bosque urbano",d:"4 jul",c:"tokyo2",e:"⛩",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Meiji_Shrine_Tokyo.jpg/800px-Meiji_Shrine_Tokyo.jpg"},
-  {n:"Harajuku — Takeshita Street",s:"La calle de la cultura pop japonesa",d:"4 jul",c:"tokyo2",e:"🛍",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Takeshita_Street_Harajuku.jpg/800px-Takeshita_Street_Harajuku.jpg"},
-  {n:"Shibuya Crossing",s:"El cruce más famoso del mundo",d:"4 jul",c:"tokyo2",e:"🚦",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Shibuya_crossing_2019.jpg/800px-Shibuya_crossing_2019.jpg"},
-  {n:"Parque Ueno",s:"La despedida de Tokyo",d:"5 jul",c:"tokyo2",e:"🌸",
-   url:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Ueno_Park_2010.jpg/800px-Ueno_Park_2010.jpg"},
+  {n:"Kokyo Gaien",         s:"Jardines del Palacio Imperial",          d:"23 jun",c:"tokyo1",e:"🌸", wiki:"Kōkyo_Gaien_National_Garden"},
+  {n:"Nishiki Market",      s:"El mercado cubierto de Kyoto",            d:"24 jun",c:"kyoto", e:"🍱", wiki:"Nishiki_Market"},
+  {n:"Castillo Nijo-jo",    s:"Los suelos «ruiseñor» de Kyoto",          d:"24 jun",c:"kyoto", e:"🏯", wiki:"Nijo_Castle"},
+  {n:"Fushimi Inari",       s:"Miles de torii naranjas en el bosque",    d:"25 jun",c:"kyoto", e:"⛩", wiki:"Fushimi_Inari-taisha"},
+  {n:"Kiyomizu-dera",       s:"El templo suspendido sobre el bosque",    d:"25 jun",c:"kyoto", e:"⛩", wiki:"Kiyomizu-dera"},
+  {n:"Kinkaku-ji",          s:"El Pabellón de Oro de Kyoto",             d:"25 jun",c:"kyoto", e:"✨", wiki:"Kinkaku-ji"},
+  {n:"Ryoan-ji",            s:"El jardín zen de las 15 piedras",         d:"25 jun",c:"kyoto", e:"🪨", wiki:"Ryōan-ji"},
+  {n:"Nara Park",           s:"Los ciervos sagrados de Nara",            d:"26 jun",c:"kyoto", e:"🦌", wiki:"Nara_Park"},
+  {n:"Todai-ji",            s:"El Gran Buda de bronce de 15 metros",     d:"26 jun",c:"kyoto", e:"🛕", wiki:"Tōdai-ji"},
+  {n:"Kasuga Taisha",       s:"3.000 linternas entre cedros milenarios", d:"26 jun",c:"kyoto", e:"⛩", wiki:"Kasuga-taisha"},
+  {n:"Byodo-in, Uji",       s:"El templo de la moneda de 10 yenes",     d:"26 jun",c:"kyoto", e:"🏛", wiki:"Byōdō-in"},
+  {n:"Castillo de Osaka",   s:"El corazón histórico de Osaka",           d:"27 jun",c:"osaka", e:"🏯", wiki:"Osaka_Castle"},
+  {n:"Dotonbori",           s:"El caos más divertido de Japón",          d:"27 jun",c:"osaka", e:"🦑", wiki:"Dōtonbori"},
+  {n:"Naoshima",            s:"La isla del arte contemporáneo",          d:"28 jun",c:"osaka", e:"🎨", wiki:"Naoshima,_Kagawa"},
+  {n:"Hiroshima — Memorial",s:"El símbolo más poderoso de la paz",       d:"29 jun",c:"osaka", e:"☮", wiki:"Hiroshima_Peace_Memorial"},
+  {n:"Itsukushima — Torii", s:"El santuario sobre el agua de Miyajima",  d:"29 jun",c:"osaka", e:"⛩", wiki:"Itsukushima_Shrine"},
+  {n:"Kenroku-en",          s:"Uno de los 3 jardines más bellos de Japón",d:"30 jun",c:"takayama",e:"🌿",wiki:"Kenroku-en"},
+  {n:"Nagamachi",           s:"El barrio samurai de Kanazawa",           d:"30 jun",c:"takayama",e:"🏘",wiki:"Nagamachi,_Kanazawa"},
+  {n:"Shirakawa-go",        s:"La aldea UNESCO con tejados de paja",     d:"1 jul", c:"takayama",e:"🏔",wiki:"Shirakawa-gō"},
+  {n:"Sanmachi Suji",       s:"El barrio histórico de Takayama",         d:"1 jul", c:"takayama",e:"🏘",wiki:"Sanmachi_Suji"},
+  {n:"Senso-ji",            s:"El templo más antiguo de Tokyo",          d:"2 jul", c:"tokyo2",e:"⛩", wiki:"Sensō-ji"},
+  {n:"Tokyo Skytree",       s:"450 metros sobre la metrópolis",          d:"2 jul", c:"tokyo2",e:"🗼", wiki:"Tokyo_Skytree"},
+  {n:"Hamarikyu Gardens",   s:"El jardín de los shogunes junto a la bahía",d:"3 jul",c:"tokyo2",e:"🌿",wiki:"Hamarikyu_Gardens"},
+  {n:"Akihabara",           s:"La meca del anime y la electrónica",      d:"3 jul", c:"tokyo2",e:"🎮", wiki:"Akihabara"},
+  {n:"Shibuya",             s:"El cruce y la terraza más famosos de Tokyo",d:"3 jul",c:"tokyo2",e:"🌆",wiki:"Shibuya"},
+  {n:"Meiji Jingu",         s:"El santuario en el bosque urbano",        d:"4 jul", c:"tokyo2",e:"⛩", wiki:"Meiji_Shrine"},
+  {n:"Harajuku",            s:"Cultura pop y diseño japonés",            d:"4 jul", c:"tokyo2",e:"🛍", wiki:"Harajuku"},
+  {n:"Parque Ueno",         s:"La despedida tranquila de Tokyo",         d:"5 jul", c:"tokyo2",e:"🌸", wiki:"Ueno_Park"},
 ];
 
-// ── STATE ────────────────────────────────────────────────────
-let tab="tokyo1",view="dias";
+// ── STATE ────────────────────────────────────────────────
+let tab="tokyo1", view="dias";
 let checks={};
 try{checks=JSON.parse(localStorage.getItem('jp_b')||'{}');}catch(e){}
-
 function save(){try{localStorage.setItem('jp_b',JSON.stringify(checks));}catch(e){}}
+
 function toggle(id){
   checks[id]=!checks[id];save();
   const row=document.getElementById('r_'+id);
@@ -381,7 +365,24 @@ function toggle(id){
   row.querySelector('.bl').classList.toggle('done',!!checks[id]);
 }
 
-// ── RENDER ───────────────────────────────────────────────────
+// ── WIKIPEDIA IMAGE FETCHER ──────────────────────────────
+// Fetches thumbnail from Wikipedia REST API — reliable, no broken URLs
+async function fetchWikiThumb(wikiTitle, imgEl, fallbackEl){
+  try{
+    const url=`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`;
+    const res=await fetch(url);
+    if(!res.ok)return;
+    const data=await res.json();
+    if(data.thumbnail && data.thumbnail.source){
+      // Request larger version — replace width in URL
+      const src=data.thumbnail.source.replace(/\/\d+px-/,'/640px-');
+      imgEl.onload=()=>{imgEl.classList.add('loaded');fallbackEl.style.opacity='0';};
+      imgEl.src=src;
+    }
+  }catch(e){/* fallback emoji stays */}
+}
+
+// ── RENDER ───────────────────────────────────────────────
 function renderTabs(){
   document.getElementById("tabs").innerHTML=view==='dias'?TABS.map(t=>`
     <button class="tab-btn${tab===t.id?" active":""}" onclick="go('${t.id}')"
@@ -399,19 +400,18 @@ function renderNav(){
 function renderContent(){
   const el=document.getElementById("content");
 
+  // ── FOTOS ──
   if(view==="fotos"){
     el.innerHTML=`
-      <div style="padding-bottom:4px">
+      <div>
         <div class="sec-title">Lugares del viaje</div>
         <div class="sec-sub">En orden de visita · ${PHOTOS.length} lugares</div>
-        ${PHOTOS.map(p=>{
+        ${PHOTOS.map((p,i)=>{
           const T=TABS.find(t=>t.id===p.c)||{color:"#888",label:"—"};
           return `<div class="photo-card">
             <div class="piw">
-              <div class="pif">${p.e}</div>
-              <img src="${p.url}" alt="${p.n}" loading="lazy"
-                onerror="this.style.display='none'"
-                onload="this.style.opacity='1'">
+              <div class="pif" id="pif_${i}">${p.e}</div>
+              <img class="pimg" id="pimg_${i}" alt="${p.n}">
             </div>
             <div class="pinfo">
               <div class="pname">${p.n}</div>
@@ -423,9 +423,16 @@ function renderContent(){
             </div>
           </div>`;}).join("")}
       </div>`;
+    // Load images from Wikipedia API after render
+    PHOTOS.forEach((p,i)=>{
+      const imgEl=document.getElementById('pimg_'+i);
+      const fallEl=document.getElementById('pif_'+i);
+      if(imgEl && fallEl) fetchWikiThumb(p.wiki, imgEl, fallEl);
+    });
     return;
   }
 
+  // ── RESERVAS ──
   if(view==="reservas"){
     const pend=BOOKINGS.filter(b=>!checks[b.id]).length;
     el.innerHTML=`
@@ -447,6 +454,7 @@ function renderContent(){
     return;
   }
 
+  // ── DÍAS ──
   const T=TABS.find(t=>t.id===tab);
   const days=DAYS.filter(d=>d.c===tab);
   el.innerHTML=`
@@ -496,7 +504,10 @@ function setView(v){
   document.getElementById('vf').classList.toggle('active',v==='fotos');
   render();
 }
-function render(){renderTabs();renderNav();renderContent();document.getElementById("scroll-area").scrollTop=0;}
+function render(){
+  renderTabs();renderNav();renderContent();
+  document.getElementById("scroll-area").scrollTop=0;
+}
 render();
 </script>
 </body>
