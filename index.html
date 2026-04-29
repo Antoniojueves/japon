@@ -366,18 +366,19 @@ function toggle(id){
 }
 
 // ── WIKIPEDIA IMAGE FETCHER ──────────────────────────────
-// Fetches thumbnail from Wikipedia REST API — reliable, no broken URLs
+// MediaWiki API with origin=* — explicit CORS support, more reliable than REST v1
 async function fetchWikiThumb(wikiTitle, imgEl, fallbackEl){
   try{
-    const url=`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`;
-    const res=await fetch(url);
+    const api='https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&pithumbsize=800&format=json&origin=*&titles='+encodeURIComponent(wikiTitle);
+    const res=await fetch(api);
     if(!res.ok)return;
     const data=await res.json();
-    if(data.thumbnail && data.thumbnail.source){
-      // Request larger version — replace width in URL
-      const src=data.thumbnail.source.replace(/\/\d+px-/,'/640px-');
+    const pages=data.query&&data.query.pages;
+    if(!pages)return;
+    const page=Object.values(pages)[0];
+    if(page&&page.thumbnail&&page.thumbnail.source){
       imgEl.onload=()=>{imgEl.classList.add('loaded');fallbackEl.style.opacity='0';};
-      imgEl.src=src;
+      imgEl.src=page.thumbnail.source;
     }
   }catch(e){/* fallback emoji stays */}
 }
