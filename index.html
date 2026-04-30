@@ -27,9 +27,12 @@ html,body{height:100%;background:#0D0D0B;color:var(--text);font-family:'DM Sans'
 .header-top{display:flex;align-items:flex-start;justify-content:space-between;padding:13px 15px 0}
 .trip-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;line-height:1.1}
 .trip-dates{font-size:10px;color:var(--dim);margin-top:2px;letter-spacing:.07em;text-transform:uppercase}
-.vbtns{display:flex;gap:4px;margin-top:2px;flex-shrink:0}
-.vbtn{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--dim);font-size:10px;font-weight:500;padding:5px 8px;cursor:pointer;font-family:inherit;transition:all .18s;white-space:nowrap}
-.vbtn.active{background:rgba(255,255,255,.12);color:var(--text);border-color:rgba(255,255,255,.18)}
+/* SUB-TABS */
+.sub-tabs{display:flex;gap:0;padding:0 14px 0;border-bottom:1px solid var(--border)}
+.sub-tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;padding:10px 6px 9px;cursor:pointer;transition:all .18s;text-align:center;white-space:nowrap}
+.sub-tab.active{color:var(--text);border-bottom-color:var(--text)}
+.res-btn{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--dim);font-size:10px;font-weight:500;padding:5px 9px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .18s}
+.res-btn.active{background:rgba(255,255,255,.12);color:var(--text);border-color:rgba(255,255,255,.18)}
 .tab-scroll{display:flex;overflow-x:auto;gap:6px;padding:10px 14px 12px;scrollbar-width:none}
 .tab-btn{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:20px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;transition:all .22s;white-space:nowrap;color:rgba(240,237,230,.55);background:rgba(255,255,255,.07)}
 .tab-btn.active{color:#fff}
@@ -85,6 +88,7 @@ html,body{height:100%;background:#0D0D0B;color:var(--text);font-family:'DM Sans'
 .pinfo{padding:12px 14px}
 .pname{font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;line-height:1.2}
 .psub{font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.4}
+.pdesc{font-size:12px;color:rgba(240,237,230,.45);margin-top:8px;line-height:1.6;padding-top:8px;border-top:1px solid var(--border)}
 .pmeta{display:flex;align-items:center;gap:7px;margin-top:8px}
 .pcity{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px}
 .pdate{font-size:10px;color:var(--faint)}
@@ -136,14 +140,13 @@ html,body{height:100%;background:#0D0D0B;color:var(--text);font-family:'DM Sans'
         <div class="trip-title">🎌 Luna de Miel · Japón</div>
         <div class="trip-dates">22 Jun — 6 Jul · 2026</div>
       </div>
-      <div class="vbtns">
-        <button class="vbtn active" id="vd" onclick="setView('dias')">Días</button>
-        <button class="vbtn" id="vr" onclick="setView('reservas')">⚠ Reservas</button>
-        <button class="vbtn" id="vf" onclick="setView('fotos')">📸 Fotos</button>
-        <button class="vbtn" id="vm" onclick="setView('mapas')">🗺 Mapas</button>
-      </div>
+      <button class="res-btn" id="vr" onclick="toggleReservas()">⚠ Reservas</button>
     </div>
-    <div class="tab-scroll" id="tabs"></div>
+    <div class="sub-tabs" id="sub-tabs">
+      <button class="sub-tab active" id="st-it" onclick="setSub('itinerario')">Itinerario</button>
+      <button class="sub-tab" id="st-fo" onclick="setSub('fotos')">📸 Fotos</button>
+      <button class="sub-tab" id="st-ma" onclick="setSub('mapa')">🗺 Mapa</button>
+    </div>
   </div>
   <div class="scroll-area" id="scroll-area">
     <div class="content" id="content"></div>
@@ -354,9 +357,110 @@ const BOOKINGS=[
 ];
 
 const PHOTOS=[
-  // 23 jun
-  {n:"Kokyo Gaien",         s:"Jardines del Palacio Imperial",              d:"23 jun",wd:"Martes",   h:"18:00",c:"tokyo1",  e:"🌸",wiki:"Tokyo_Imperial_Palace"},
-  {n:"Marunouchi House",    s:"Cena con vistas a Tokyo Station",            d:"23 jun",wd:"Martes",   h:"19:00",c:"tokyo1",  e:"🍽",wiki:"Marunouchi"},
+  // 23 jun — Tokyo I
+  {n:"Narita Airport",      s:"Llegada a Japón",                             d:"23 jun",wd:"Martes",   h:"15:10",c:"tokyo1",  e:"✈",wiki:"Narita_International_Airport",
+   desc:"El segundo aeropuerto más grande de Japón, a 60 km de Tokyo. Aquí comienza el viaje — pasaportes, primera tarjeta Suica y el primer yen en el bolsillo."},
+  {n:"Hotel JAL City Toyosu",s:"Casa durante las dos estancias en Tokyo",   d:"23 jun",wd:"Martes",   h:"17:00",c:"tokyo1",  e:"🏨",wiki:"Toyosu",
+   desc:"Toyosu es un barrio moderno en la bahía de Tokyo, a 5 minutos andando de TeamLab Planets. El hotel está bien conectado en metro con el resto de la ciudad."},
+  {n:"Kokyo Gaien",         s:"Jardines del Palacio Imperial",               d:"23 jun",wd:"Martes",   h:"18:00",c:"tokyo1",  e:"🌸",wiki:"Tokyo_Imperial_Palace",
+   desc:"Los jardines exteriores de la residencia del Emperador de Japón. El famoso doble puente Nijubashi y los pinos centenarios recortados a mano son el símbolo más reconocible de Tokyo."},
+  {n:"Marunouchi House",    s:"Primera cena con vistas a Tokyo Station",     d:"23 jun",wd:"Martes",   h:"19:00",c:"tokyo1",  e:"🍽",wiki:"Marunouchi",
+   desc:"Complejo de restaurantes en la planta 7 del Shin-Marunouchi Building, directamente frente a Tokyo Station. Varios estilos de cocina en un ambiente elegante con vistas a la ciudad."},
+  // 24 jun — Kyoto
+  {n:"Estación de Kyoto",   s:"Llegada en Shinkansen desde Tokyo",           d:"24 jun",wd:"Miércoles",h:"11:15",c:"kyoto",  e:"🚄",wiki:"Kyoto_Station",
+   desc:"Una de las estaciones más grandes de Japón, con un diseño futurista que contrasta con la ciudad histórica que la rodea. Tiene centros comerciales, mercados de comida y hasta un jardín en el techo."},
+  {n:"Hotel Kyoto Karasuma",s:"Hotel en el corazón de Kyoto",                d:"24 jun",wd:"Miércoles",h:"13:00",c:"kyoto",  e:"🏨",wiki:"Kyoto",
+   desc:"El Karasuma Rokkaku está en el centro histórico, a 2 minutos de Nishiki Market y a pie de los principales barrios de Kyoto. Habitación Executive king con vistas."},
+  {n:"Nishiki Market",      s:"El mercado cubierto de Kyoto",                d:"24 jun",wd:"Miércoles",h:"11:30",c:"kyoto",  e:"🍱",wiki:"Nishiki_Market",
+   desc:"Llamado 'la cocina de Kyoto', este mercado cubierto de 400 metros tiene más de 100 puestos con encurtidos, tofu, pescado seco, dulces de matcha y comida callejera. Lleva funcionando desde el siglo XIV."},
+  {n:"Castillo Nijo-jo",    s:"Los suelos «ruiseñor» de Kyoto",              d:"24 jun",wd:"Miércoles",h:"15:00",c:"kyoto",  e:"🏯",wiki:"Nijo_Castle",
+   desc:"Construido en 1603 para el shogun Tokugawa, sus suelos de madera están diseñados para rechinar al pisarlos — un sistema de alarma contra intrusos. Los jardines Ninomaru son de los más perfectos de Japón."},
+  {n:"Gion",                s:"El barrio de las geishas y Pontocho",         d:"24 jun",wd:"Miércoles",h:"18:00",c:"kyoto",  e:"🏮",wiki:"Gion,_Kyoto",
+   desc:"El barrio de entretenimiento histórico de Kyoto, con calles de machiya (casas de madera) del período Edo. Pontocho es el callejón más famoso, con restaurantes sobre el río Kamo y posibilidad de ver maiko al caer la noche."},
+  // 25 jun
+  {n:"Fushimi Inari",       s:"Miles de torii naranjas en el bosque",        d:"25 jun",wd:"Jueves",   h:"06:30",c:"kyoto",  e:"⛩",wiki:"Fushimi_Inari-taisha",
+   desc:"El santuario más visitado de Japón, con más de 10.000 torii naranjas serpenteando por el monte Inari. De madrugada, antes de las 7h, los caminos están casi vacíos y la experiencia es completamente diferente a las fotos turísticas."},
+  {n:"Sanjusangendo",       s:"1.001 guerreros Kannon dorados",              d:"25 jun",wd:"Jueves",   h:"09:00",c:"kyoto",  e:"🛕",wiki:"Sanjusangen-do",
+   desc:"Una sala de 120 metros de longitud con 1.001 estatuas de Kannon (diosa de la misericordia) en madera dorada, todas de pie, todas distintas. El interior no tiene fotografías permitidas — es una de las experiencias más impactantes de Japón."},
+  {n:"Kiyomizu-dera",       s:"El templo suspendido sobre el bosque",        d:"25 jun",wd:"Jueves",   h:"11:00",c:"kyoto",  e:"⛩",wiki:"Kiyomizu-dera",
+   desc:"Construido en el año 798, este templo está literalmente suspendido sobre el bosque gracias a una estructura de 139 pilares de madera de ciprés ensamblados sin un solo clavo. Las vistas desde la terraza abarcan Kyoto entera."},
+  {n:"Ninenzaka",           s:"Calles de piedra de Higashiyama",             d:"25 jun",wd:"Jueves",   h:"12:30",c:"kyoto",  e:"🏘",wiki:"Ninenzaka",
+   desc:"El tramo peatonal más bonito de Kyoto — dos calles empedradas del período Edo flanqueadas por casas de madera con tiendas de cerámica, abanicos y lacas tradicionales. Bajan desde Kiyomizu hasta el barrio de Gion."},
+  {n:"Kinkaku-ji",          s:"El Pabellón de Oro de Kyoto",                 d:"25 jun",wd:"Jueves",   h:"15:00",c:"kyoto",  e:"✨",wiki:"Kinkaku-ji",
+   desc:"El pabellón de tres plantas está cubierto con pan de oro real, y su reflejo en el estanque Kyoko-chi es una de las imágenes más reconocibles de Japón. Fue quemado y reconstruido varias veces — la versión actual es de 1955."},
+  {n:"Ryoan-ji",            s:"El jardín zen de las 15 piedras",             d:"25 jun",wd:"Jueves",   h:"16:30",c:"kyoto",  e:"🪨",wiki:"Ryoan-ji",
+   desc:"El jardín zen más famoso del mundo: 15 piedras dispuestas en grava blanca rastrillada. Desde cualquier ángulo solo se ven 14. Algunos dicen que la piedra oculta es un mensaje sobre la imperfección; el templo guarda silencio al respecto."},
+  // 26 jun
+  {n:"Nara Park",           s:"Los ciervos sagrados de Nara",                d:"26 jun",wd:"Viernes",  h:"08:45",c:"kyoto",  e:"🦌",wiki:"Nara_Park",
+   desc:"Más de 1.300 ciervos sika vagan libres por el parque, considerados mensajeros de los dioses shinto. Las shika sembei (galletas de salvado) se venden por todo el parque para dárselas — los ciervos hacen una reverencia para pedirlas."},
+  {n:"Todai-ji",            s:"El Gran Buda de bronce de 15 metros",         d:"26 jun",wd:"Viernes",  h:"09:30",c:"kyoto",  e:"🛕",wiki:"Todai-ji",
+   desc:"El Gran Buda Vairocana del año 752 mide 15 metros de altura y es la estatua de bronce más grande del mundo cubierta en interior. El edificio que lo alberga, reconstruido en el s.XVIII, sigue siendo el mayor edificio de madera del planeta."},
+  {n:"Kasuga Taisha",       s:"3.000 linternas entre cedros milenarios",     d:"26 jun",wd:"Viernes",  h:"11:00",c:"kyoto",  e:"⛩",wiki:"Kasuga_Grand_Shrine",
+   desc:"Fundado en el año 768, este santuario tiene más de 3.000 linternas de piedra y bronce donadas a lo largo de los siglos. Solo se encienden dos veces al año, durante los festivales Mantoro — el resultado es absolutamente mágico."},
+  {n:"Taihoan — Uji",       s:"Ceremonia del té en pabellón histórico",      d:"26 jun",wd:"Viernes",  h:"14:30",c:"kyoto",  e:"🍵",wiki:"Uji,_Kyoto",
+   desc:"Uji es la capital del matcha japonés — los mejores campos de té del país. Taihoan es un pabellón histórico real en el parque Ujigawa donde se celebran sesiones de chanoyu (ceremonia del té) en tatami, sin ambiente de tour turístico."},
+  {n:"Byodo-in, Uji",       s:"El templo de la moneda de 10 yenes",         d:"26 jun",wd:"Viernes",  h:"15:45",c:"kyoto",  e:"🏛",wiki:"Byodo-in",
+   desc:"Construido en 1052 como villa aristocrática y convertido en templo budista, el Salón del Fénix se refleja en el estanque delante con una simetría perfecta. Su imagen aparece en todas las monedas de 10 yenes japoneses desde 1959."},
+  // 27 jun — Osaka
+  {n:"Mitsui Garden Hotel", s:"Hotel con vistas al río en Osaka",            d:"27 jun",wd:"Sábado",   h:"12:00",c:"osaka",  e:"🏨",wiki:"Osaka",
+   desc:"El Mitsui Garden Osaka Premier está en el corazón de la ciudad, con vistas al río Okawa desde las habitaciones superiores y acceso a pie a los principales barrios de Osaka."},
+  {n:"Castillo de Osaka",   s:"El corazón histórico de Osaka",               d:"27 jun",wd:"Sábado",   h:"10:00",c:"osaka",  e:"🏯",wiki:"Osaka_Castle",
+   desc:"Construido por Toyotomi Hideyoshi en 1583 para unificar Japón, el castillo fue destruido y reconstruido varias veces. Los jardines exteriores son libres y espectaculares; el museo interior narra la historia de las guerras feudales japonesas."},
+  {n:"Dotonbori",           s:"El caos gastronómico de Osaka",               d:"27 jun",wd:"Sábado",   h:"14:00",c:"osaka",  e:"🦑",wiki:"Dotonbori",
+   desc:"La calle más bulliciosa de Japón, bordeando el canal Dotonbori. El famoso cartel del corredor Glico, fachadas de restaurantes con calamares gigantes mecánicos, y el mejor takoyaki y okonomiyaki del país. Osaka se define aquí."},
+  // 28 jun
+  {n:"Chichu Art Museum",   s:"Monet, Turrell y De Maria bajo tierra",       d:"28 jun",wd:"Domingo",  h:"10:00",c:"osaka",  e:"🎨",wiki:"Chichu_Art_Museum",
+   desc:"Diseñado por Tadao Ando y enterrado en la colina de Naoshima, el museo alberga obras permanentes de Claude Monet, James Turrell y Walter De Maria. La luz natural cambia cómo se percibe cada obra según la hora del día."},
+  {n:"Naoshima",            s:"La isla del arte contemporáneo",              d:"28 jun",wd:"Domingo",  h:"12:30",c:"osaka",  e:"🎨",wiki:"Naoshima,_Kagawa",
+   desc:"Una pequeña isla pesquera del Mar Interior de Japón transformada desde los años 90 en uno de los destinos de arte contemporáneo más importantes del mundo. Casas abandonadas convertidas en instalaciones, museos enterrados y la calabaza amarilla de Yayoi Kusama."},
+  // 29 jun
+  {n:"Hiroshima — Memorial",s:"El símbolo más poderoso de la paz",           d:"29 jun",wd:"Lunes",    h:"08:30",c:"osaka",  e:"☮",wiki:"Hiroshima_Peace_Memorial",
+   desc:"La Cúpula Genbaku es el único edificio que sobrevivió en pie en el epicentro de la bomba atómica del 6 de agosto de 1945. Declarada Patrimonio UNESCO, es hoy el símbolo universal de la paz y el desarme nuclear."},
+  {n:"Itsukushima — Torii", s:"El santuario sobre el agua de Miyajima",      d:"29 jun",wd:"Lunes",    h:"11:45",c:"osaka",  e:"⛩",wiki:"Itsukushima_Shrine",
+   desc:"Construido sobre pilotes en el mar en el año 593, el santuario de Itsukushima parece flotar durante la marea alta. El gran torii naranja a 200 metros de la orilla es una de las tres vistas más bellas de Japón según la tradición."},
+  {n:"Templo Daisho-in",    s:"500 estatuas de monjes entre campanillas",    d:"29 jun",wd:"Lunes",    h:"13:00",c:"osaka",  e:"🛕",wiki:"Daisho-in",
+   desc:"Templo budista en la falda del monte Misen, mucho menos visitado que el santuario de abajo. Las 500 estatuas de piedra de Rakan (discípulos de Buda) llevan gorros de lana tejidos por devotos, y miles de campanillas de bronce suenan con el viento."},
+  // 30 jun — Takayama/Kanazawa
+  {n:"Kenroku-en",          s:"Uno de los 3 jardines más bellos de Japón",   d:"30 jun",wd:"Martes",   h:"09:30",c:"takayama",e:"🌿",wiki:"Kenroku-en",
+   desc:"Diseñado a lo largo de 180 años por los señores del clan Maeda, Kenroku-en combina los seis atributos del jardín perfecto según la estética china: extensión, soledad, artificio, antigüedad, cursos de agua y panoramas. Especialmente hermoso de mañana temprano."},
+  {n:"Nagamachi",           s:"El barrio samurai de Kanazawa",               d:"30 jun",wd:"Martes",   h:"12:00",c:"takayama",e:"🏘",wiki:"Nagamachi,_Kanazawa",
+   desc:"Barrio residencial del período Edo donde vivían los samuráis al servicio del clan Maeda. Los muros de adobe con canales de riego interiores y las casas señoriales están perfectamente conservados — algunas abiertas al público como museos."},
+  {n:"Higashi Chaya",       s:"El barrio de las geishas de Kanazawa",        d:"30 jun",wd:"Martes",   h:"14:30",c:"takayama",e:"🍵",wiki:"Higashi_Chaya",
+   desc:"El más grande de los tres barrios de chaya (casas de té) de Kanazawa, establecido en 1820 por decreto del shogunato para concentrar el entretenimiento. Las fachadas de madera con rejillas de madera están perfectamente conservadas."},
+  // 1 jul
+  {n:"Hida Takayama Onsen", s:"El ryokan en los Alpes japoneses",            d:"1 jul", wd:"Miércoles",h:"18:00",c:"takayama",e:"🏨",wiki:"Takayama,_Gifu",
+   desc:"El onsen del hotel usa aguas termales naturales de las montañas de Hida. Banera interior y exterior, ambiente de ryokan tradicional con yukata. La noche más especial del viaje."},
+  {n:"Sanmachi Suji",       s:"El barrio histórico de Takayama",             d:"1 jul", wd:"Miércoles",h:"07:00",c:"takayama",e:"🏘",wiki:"Sanmachi_Suji",
+   desc:"Tres calles del período Edo perfectamente conservadas con almacenes de sake, tiendas de artesanía y casas de madera oscura. De mañana temprano, antes de que lleguen los grupos, es uno de los rincones más auténticos de Japón."},
+  {n:"Shirakawa-go",        s:"La aldea UNESCO con tejados de paja",         d:"1 jul", wd:"Miércoles",h:"11:30",c:"takayama",e:"🏔",wiki:"Shirakawa-go",
+   desc:"Aldea de montaña declarada Patrimonio UNESCO, con casas gassho-zukuri cuyos tejados de paja a dos aguas tienen hasta 9 metros de inclinación para soportar la nieve del invierno. El mirador panorámico ofrece la vista más fotografiada de la arquitectura rural japonesa."},
+  // 2 jul — Tokyo II
+  {n:"Senso-ji",            s:"El templo más antiguo de Tokyo",              d:"2 jul", wd:"Jueves",   h:"16:00",c:"tokyo2",  e:"⛩",wiki:"Senso-ji",
+   desc:"Fundado en el año 645, es el templo más visitado del mundo con más de 30 millones de visitantes al año. La puerta Kaminarimon con su linterna roja de 700 kg, el pasaje Nakamise con tiendas de souvenirs y el patio principal son imprescindibles."},
+  {n:"Tokyo Skytree",       s:"450 metros sobre la metrópolis",              d:"2 jul", wd:"Jueves",   h:"17:30",c:"tokyo2",  e:"🗼",wiki:"Tokyo_Skytree",
+   desc:"La torre más alta de Japón y segunda del mundo (634 metros), con dos miradores a 350 y 450 metros. Desde arriba, en días claros, se ve el monte Fuji a 100 km. A 10 minutos andando de Senso-ji — ideal ir al atardecer."},
+  // 3 jul
+  {n:"Hamarikyu Gardens",   s:"El jardín de los shogunes junto a la bahía",  d:"3 jul", wd:"Viernes",  h:"09:00",c:"tokyo2",  e:"🌿",wiki:"Hamarikyu_Gardens",
+   desc:"Antiguo jardín privado de los shogunes Tokugawa, abierto al público en 1945. Tiene un estanque de agua salada que sube y baja con las mareas de la bahía de Tokyo y una caseta de té en una isla interior accesible por puente."},
+  {n:"Akihabara",           s:"La meca del anime y la electrónica",          d:"3 jul", wd:"Viernes",  h:"10:30",c:"tokyo2",  e:"🎮",wiki:"Akihabara",
+   desc:"El barrio electrónico de Tokyo, reconvertido desde los años 90 en la capital mundial del anime, manga y cultura otaku. Tiendas de electrónica de 8 plantas, arcades con máquinas imposibles de encontrar en Europa y maid cafés."},
+  {n:"TeamLab Planets",     s:"Arte inmersivo acuático en Toyosu",           d:"3 jul", wd:"Viernes",  h:"16:00",c:"tokyo2",  e:"🎨",wiki:"TeamLab",
+   desc:"Una de las experiencias más singulares de Tokyo: descalzo y con los pantalones recogidos, atraviesas salas donde el agua, la luz y los reflejos se fusionan en instalaciones digitales que reaccionan a tu presencia. A 5 minutos andando del hotel."},
+  {n:"Shibuya Sky",         s:"La ciudad iluminada a 229 metros de altura",  d:"3 jul", wd:"Viernes",  h:"19:00",c:"tokyo2",  e:"🌆",wiki:"Shibuya_Scramble_Square",
+   desc:"El mirador al aire libre más alto de Shibuya, en la cima del Shibuya Scramble Square. Vistas de 360° sobre Tokyo de noche — la trama de luces de la metrópolis más grande del mundo, con el cruce de Shibuya directamente debajo."},
+  // 4 jul
+  {n:"Meiji Shrine",        s:"El santuario en el bosque urbano",            d:"4 jul", wd:"Sábado",   h:"09:00",c:"tokyo2",  e:"⛩",wiki:"Meiji_Shrine",
+   desc:"Construido en 1920 en homenaje al Emperador Meiji, el santuario está rodeado por un bosque artificial de 70.000 árboles donados de todo Japón. Un oasis de silencio absoluto en medio de la ciudad más ruidosa del mundo."},
+  {n:"Harajuku",            s:"Cultura pop y boutiques de diseño japonés",   d:"4 jul", wd:"Sábado",   h:"13:00",c:"tokyo2",  e:"🛍",wiki:"Harajuku",
+   desc:"Takeshita Street es el epicentro de la moda alternativa japonesa — crepes de colores, ropa extravagante y cosplay. Omotesando, en cambio, es la avenida de lujo: LVMH, Prada, Issey Miyake y los mejores diseñadores japoneses."},
+  {n:"Shibuya Crossing",    s:"El cruce más famoso del mundo",               d:"4 jul", wd:"Sábado",   h:"15:30",c:"tokyo2",  e:"🚦",wiki:"Shibuya_Station",
+   desc:"Hasta 3.000 personas cruzan simultáneamente en todas direcciones cuando el semáforo cambia. El Starbucks del primer piso tiene las mejores vistas al cruce — llega un poco antes de la hora punta para asegurarte sitio en la ventana."},
+  {n:"Mirador Ayuntamiento",s:"Las mejores vistas gratuitas de Shinjuku",    d:"4 jul", wd:"Sábado",   h:"18:00",c:"tokyo2",  e:"🌃",wiki:"Tokyo_Metropolitan_Government_Building",
+   desc:"El Ayuntamiento Metropolitano de Tokyo tiene dos torres gemelas con miradores gratuitos abiertos hasta las 23h. Vistas de 360° de Shinjuku y toda la metrópolis — de noche, con el perfil de rascacielos iluminados, es espectacular."},
+  // 5 jul
+  {n:"Parque Ueno",         s:"La despedida tranquila de Tokyo",             d:"5 jul", wd:"Domingo",  h:"10:30",c:"tokyo2",  e:"🌸",wiki:"Ueno_Park",
+   desc:"El parque más grande del centro de Tokyo, con museos de arte, el zoo más antiguo de Japón y el estanque Shinobazu con flores de loto. Los domingos hay músicos callejeros y familias de picnic. Una despedida tranquila antes del vuelo."},
+];
   // 24 jun
   {n:"Nishiki Market",      s:"El mercado cubierto de Kyoto",               d:"24 jun",wd:"Miércoles",h:"11:30",c:"kyoto",   e:"🍱",wiki:"Nishiki_Market"},
   {n:"Castillo Nijo-jo",    s:"Los suelos «ruiseñor» de Kyoto",             d:"24 jun",wd:"Miércoles",h:"15:00",c:"kyoto",   e:"🏯",wiki:"Nijo_Castle"},
@@ -408,7 +512,7 @@ const PHOTOS=[
 ];
 
 // ── STATE ────────────────────────────────────────────────
-let tab="tokyo1", view="dias";
+let tab="tokyo1", subview="itinerario", showReservas=false;
 let checks={};
 try{checks=JSON.parse(localStorage.getItem('jp_b')||'{}');}catch(e){}
 function save(){try{localStorage.setItem('jp_b',JSON.stringify(checks));}catch(e){}}
@@ -455,102 +559,135 @@ async function fetchWikiThumb(wikiTitle, imgEl, fallbackEl){
 }
 
 // ── RENDER ───────────────────────────────────────────────
-function renderTabs(){
-  document.getElementById("tabs").innerHTML=view==='dias'?TABS.map(t=>`
-    <button class="tab-btn${tab===t.id?" active":""}" onclick="go('${t.id}')"
-      style="${tab===t.id?`background:${t.color};box-shadow:0 3px 14px ${t.color}44;color:#fff`:''}">
-      ${t.emoji} ${t.label}</button>`).join(""):'';
-}
-
 function renderNav(){
   document.getElementById("bnav").innerHTML=TABS.map(t=>`
     <button class="nav-btn" onclick="go('${t.id}')"
-      style="${tab===t.id&&view==='dias'?`color:${t.color}`:''}">
+      style="${tab===t.id?`color:${t.color}`:''}">
       <span class="ne">${t.emoji}</span>${t.label}</button>`).join("");
+}
+
+function renderSubTabs(){
+  ['it','fo','ma'].forEach(k=>{
+    const key=k==='it'?'itinerario':k==='fo'?'fotos':'mapa';
+    const el=document.getElementById('st-'+k);
+    if(el) el.classList.toggle('active',subview===key&&!showReservas);
+  });
+  const vr=document.getElementById('vr');
+  if(vr) vr.classList.toggle('active',showReservas);
 }
 
 function renderContent(){
   const el=document.getElementById("content");
+  const T=TABS.find(t=>t.id===tab)||TABS[0];
 
-  // ── MAPAS ──
-  if(view==="mapas"){ renderMaps(); return; }
+  // ── RESERVAS ──
+  if(showReservas){
+    const pend=BOOKINGS.filter(b=>!checks[b.id]).length;
+    el.innerHTML=`<div>
+      <div class="sec-title">Reservas</div>
+      <div class="sec-sub">Toca para marcar como hecha · ${pend} de ${BOOKINGS.length} pendientes</div>
+      ${BOOKINGS.map(b=>{const done=!!checks[b.id];return `<div class="br" id="r_${b.id}" onclick="toggle('${b.id}')">
+        <div class="bchk${done?' done':''}">${done?'✓':''}</div>
+        <div class="bi">
+          <div class="bl${done?' done':''}">${b.n}</div>
+          <div class="bw">${b.d}</div>
+          ${b.note?`<div class="bn">${b.note}</div>`:''}
+          <span class="bb ${b.u==='h'?'bh':b.u==='m'?'bm':'bf'}">${b.u==='h'?'Urgente':b.u==='m'?'Recomendable':'Informativo'}</span>
+        </div>
+      </div>`;}).join("")}
+    </div>`;
+    return;
+  }
 
-  // ── FOTOS ──
-  if(view==="fotos"){
-    const dayKeys=[...new Set(PHOTOS.map(p=>p.d))];
-    let html=`<div style="background:#0D0D0B">
-      <div class="sec-title">Lugares del viaje</div>
-      <div class="sec-sub">${PHOTOS.length} lugares · toca un día para contraer</div>`;
-    dayKeys.forEach((day,di)=>{
-      const dayPhotos=PHOTOS.map((p,i)=>({...p,gi:i})).filter(p=>p.d===day);
-      const T=TABS.find(t=>t.id===dayPhotos[0].c)||{color:"#888"};
-      html+=`
-        <div class="photo-day-group">
-          <div class="photo-day-header" onclick="togglePhotoDay(${di})">
-            <div class="photo-day-line" style="background:${T.color}"></div>
-            <div class="photo-day-label">
-              <span class="photo-day-num" style="color:${T.color}">${day}</span>
-              <span class="photo-day-wd">${dayPhotos[0].wd}</span>
+  // ── MAPA ──
+  if(subview==="mapa"){
+    const tabDays=MAPDAYS.filter(d=>d.c===tab);
+    leafletMaps={};
+    el.innerHTML=`<div style="background:#0D0D0B">
+      <div class="sec-title">${T.emoji} ${T.label}</div>
+      <div class="sec-sub">${tabDays.length} días · toca para contraer</div>
+      ${tabDays.map(day=>{
+        const realDi=MAPDAYS.indexOf(day);
+        return `<div class="map-day-group">
+          <div class="map-day-header" onclick="toggleMapDay(${realDi})">
+            <div class="map-day-line" style="background:${T.color}"></div>
+            <div class="map-day-label">
+              <span class="map-day-num" style="color:${T.color}">${day.d}</span>
+              <span class="map-day-wd">${day.wd}</span>
             </div>
-            <span class="photo-day-count">${dayPhotos.length} lugares</span>
-            <span class="photo-day-arrow open" id="parr_${di}">▼</span>
+            <span class="map-day-sub">${day.pts.length} puntos</span>
+            <span class="map-day-arrow open" id="marr_${realDi}">▼</span>
           </div>
-          <div class="photo-day-body" id="pbody_${di}">
-            ${dayPhotos.map(p=>{
-              const Tc=TABS.find(t=>t.id===p.c)||{color:"#888",label:"—"};
-              return `<div class="photo-card">
-                <div class="piw">
-                  <div class="pif" id="pif_${p.gi}">${p.e}</div>
-                  <img class="pimg" id="pimg_${p.gi}" alt="${p.n}">
-                </div>
-                <div class="pinfo">
-                  <div class="pname">${p.n}</div>
-                  <div class="psub">${p.s}</div>
-                  <div class="pmeta">
-                    <span class="pcity" style="background:${Tc.color}22;color:${Tc.color};border:1px solid ${Tc.color}44">${Tc.label}</span>
-                    <span class="pdate">${p.d}</span>
-                    <span class="ptime">🕐 ${p.h}</span>
-                  </div>
-                </div>
-              </div>`;
-            }).join('')}
+          <div class="map-day-body" id="mbody_${realDi}">
+            <div style="height:10px"></div>
+            <div class="map-wrap">
+              <div class="leaflet-map" id="lmap_${realDi}"></div>
+              <div class="map-legend">
+                ${day.pts.map(p=>`<div class="map-leg-row">
+                  <div class="map-leg-dot" style="background:${T.color}"></div>
+                  <span>${p.n}</span>
+                  <span class="map-leg-time">${p.h}</span>
+                </div>`).join('')}
+              </div>
+            </div>
           </div>
         </div>`;
+      }).join('')}
+    </div>`;
+    setTimeout(()=>initAllMaps(),80);
+    return;
+  }
+
+  // ── FOTOS ──
+  if(subview==="fotos"){
+    const tabPhotos=PHOTOS.map((p,i)=>({...p,gi:i})).filter(p=>p.c===tab);
+    const dayKeys=[...new Set(tabPhotos.map(p=>p.d))];
+    let html=`<div style="background:#0D0D0B">
+      <div class="sec-title">${T.emoji} ${T.label}</div>
+      <div class="sec-sub">${tabPhotos.length} lugares · toca para contraer</div>`;
+    dayKeys.forEach((day,di)=>{
+      const dayPhotos=tabPhotos.filter(p=>p.d===day);
+      const uid=`${tab}_${di}`;
+      html+=`<div class="photo-day-group">
+        <div class="photo-day-header" onclick="togglePhotoDay('${uid}')">
+          <div class="photo-day-line" style="background:${T.color}"></div>
+          <div class="photo-day-label">
+            <span class="photo-day-num" style="color:${T.color}">${day}</span>
+            <span class="photo-day-wd">${dayPhotos[0].wd}</span>
+          </div>
+          <span class="photo-day-count">${dayPhotos.length} lugares</span>
+          <span class="photo-day-arrow open" id="parr_${uid}">▼</span>
+        </div>
+        <div class="photo-day-body" id="pbody_${uid}">
+          ${dayPhotos.map(p=>`<div class="photo-card">
+            <div class="piw">
+              <div class="pif" id="pif_${p.gi}">${p.e}</div>
+              <img class="pimg" id="pimg_${p.gi}" alt="${p.n}">
+            </div>
+            <div class="pinfo">
+              <div class="pname">${p.n}</div>
+              <div class="psub">${p.s}</div>
+              ${p.desc?`<div class="pdesc">${p.desc}</div>`:''}
+              <div class="pmeta">
+                <span class="pdate">${p.d}</span>
+                <span class="ptime">🕐 ${p.h}</span>
+              </div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>`;
     });
     html+='</div>';
     el.innerHTML=html;
-    PHOTOS.forEach((p,i)=>{
-      const imgEl=document.getElementById('pimg_'+i);
-      const fallEl=document.getElementById('pif_'+i);
+    tabPhotos.forEach(p=>{
+      const imgEl=document.getElementById('pimg_'+p.gi);
+      const fallEl=document.getElementById('pif_'+p.gi);
       if(imgEl&&fallEl) fetchWikiThumb(p.wiki,imgEl,fallEl);
     });
     return;
   }
 
-  // ── RESERVAS ──
-  if(view==="reservas"){
-    const pend=BOOKINGS.filter(b=>!checks[b.id]).length;
-    el.innerHTML=`
-      <div>
-        <div class="sec-title">Reservas</div>
-        <div class="sec-sub">Toca para marcar como hecha · ${pend} de ${BOOKINGS.length} pendientes</div>
-        ${BOOKINGS.map(b=>{
-          const done=!!checks[b.id];
-          return `<div class="br" id="r_${b.id}" onclick="toggle('${b.id}')">
-            <div class="bchk${done?' done':''}">${done?'✓':''}</div>
-            <div class="bi">
-              <div class="bl${done?' done':''}">${b.n}</div>
-              <div class="bw">${b.d}</div>
-              ${b.note?`<div class="bn">${b.note}</div>`:''}
-              <span class="bb ${b.u==='h'?'bh':b.u==='m'?'bm':'bf'}">${b.u==='h'?'Urgente':b.u==='m'?'Recomendable':'Informativo'}</span>
-            </div>
-          </div>`;}).join("")}
-      </div>`;
-    return;
-  }
-
-  // ── DÍAS ──
-  const T=TABS.find(t=>t.id===tab);
+  // ── ITINERARIO ──
   const days=DAYS.filter(d=>d.c===tab);
   el.innerHTML=`
     <div class="city-intro">
@@ -588,119 +725,91 @@ function renderContent(){
 
 // ── MAP DATA ─────────────────────────────────────────────
 const MAPDAYS=[
-  {d:"23 jun",wd:"Martes",c:"tokyo1",title:"Marunouchi · Palacio Imperial",pts:[
-    {n:"Kokyo Gaien",       h:"18:00",lat:35.6852,lng:139.7528},
-    {n:"Marunouchi House",  h:"19:00",lat:35.6815,lng:139.7671},
+  {d:"23 jun",wd:"Martes",c:"tokyo1",pts:[
+    {n:"Narita Airport NRT", h:"15:10",lat:35.7720,lng:140.3929},
+    {n:"Hotel JAL City Toyosu",h:"17:00",lat:35.6497,lng:139.7967},
+    {n:"Kokyo Gaien",        h:"18:00",lat:35.6852,lng:139.7528},
+    {n:"Marunouchi House",   h:"19:00",lat:35.6815,lng:139.7671},
   ]},
-  {d:"24 jun",wd:"Miércoles",c:"kyoto",title:"Llegada a Kyoto",pts:[
-    {n:"Nishiki Market",    h:"11:30",lat:35.0050,lng:135.7659},
-    {n:"Castillo Nijo-jo",  h:"15:00",lat:35.0141,lng:135.7480},
-    {n:"Gion + Pontocho",   h:"18:00",lat:35.0038,lng:135.7753},
+  {d:"24 jun",wd:"Miércoles",c:"kyoto",pts:[
+    {n:"Estación Kyoto",     h:"11:15",lat:34.9858,lng:135.7588},
+    {n:"Hotel Kyoto Karasuma",h:"13:00",lat:35.0042,lng:135.7634},
+    {n:"Nishiki Market",     h:"11:30",lat:35.0050,lng:135.7659},
+    {n:"Castillo Nijo-jo",   h:"15:00",lat:35.0141,lng:135.7480},
+    {n:"Gion + Pontocho",    h:"18:00",lat:35.0038,lng:135.7753},
   ]},
-  {d:"25 jun",wd:"Jueves",c:"kyoto",title:"Sur y este — templos",pts:[
-    {n:"Fushimi Inari",     h:"06:30",lat:34.9671,lng:135.7727},
-    {n:"Sanjusangendo",     h:"09:00",lat:34.9877,lng:135.7704},
-    {n:"Kiyomizu-dera",     h:"11:00",lat:34.9949,lng:135.7850},
-    {n:"Ninenzaka",         h:"12:30",lat:34.9972,lng:135.7825},
-    {n:"Kinkaku-ji",        h:"15:00",lat:35.0394,lng:135.7292},
-    {n:"Ryoan-ji",          h:"16:30",lat:35.0343,lng:135.7180},
+  {d:"25 jun",wd:"Jueves",c:"kyoto",pts:[
+    {n:"Fushimi Inari",      h:"06:30",lat:34.9671,lng:135.7727},
+    {n:"Sanjusangendo",      h:"09:00",lat:34.9877,lng:135.7704},
+    {n:"Kiyomizu-dera",      h:"11:00",lat:34.9949,lng:135.7850},
+    {n:"Ninenzaka",          h:"12:30",lat:34.9972,lng:135.7825},
+    {n:"Kinkaku-ji",         h:"15:00",lat:35.0394,lng:135.7292},
+    {n:"Ryoan-ji",           h:"16:30",lat:35.0343,lng:135.7180},
   ]},
-  {d:"26 jun",wd:"Viernes",c:"kyoto",title:"Nara · Uji",pts:[
-    {n:"Nara Park",         h:"08:45",lat:34.6851,lng:135.8441},
-    {n:"Todai-ji",          h:"09:30",lat:34.6888,lng:135.8398},
-    {n:"Kasuga Taisha",     h:"11:00",lat:34.6813,lng:135.8480},
-    {n:"Taihoan (Uji)",     h:"14:30",lat:34.8908,lng:135.8057},
-    {n:"Byodo-in",          h:"15:45",lat:34.8893,lng:135.8075},
+  {d:"26 jun",wd:"Viernes",c:"kyoto",pts:[
+    {n:"Nara Park",          h:"08:45",lat:34.6851,lng:135.8441},
+    {n:"Todai-ji",           h:"09:30",lat:34.6888,lng:135.8398},
+    {n:"Kasuga Taisha",      h:"11:00",lat:34.6813,lng:135.8480},
+    {n:"Estación Uji",       h:"13:00",lat:34.8934,lng:135.7992},
+    {n:"Taihoan (Uji)",      h:"14:30",lat:34.8908,lng:135.8057},
+    {n:"Byodo-in",           h:"15:45",lat:34.8893,lng:135.8075},
   ]},
-  {d:"27 jun",wd:"Sábado",c:"osaka",title:"Kyoto → Osaka",pts:[
-    {n:"Castillo de Osaka", h:"10:00",lat:34.6873,lng:135.5262},
-    {n:"Dotonbori",         h:"14:00",lat:34.6687,lng:135.5013},
-    {n:"Kuromon Ichiba",    h:"16:30",lat:34.6680,lng:135.5067},
-    {n:"Shinsekai",         h:"19:30",lat:34.6527,lng:135.5063},
+  {d:"27 jun",wd:"Sábado",c:"osaka",pts:[
+    {n:"Mitsui Garden Hotel",h:"12:00",lat:34.6943,lng:135.5082},
+    {n:"Castillo de Osaka",  h:"10:00",lat:34.6873,lng:135.5262},
+    {n:"Dotonbori",          h:"14:00",lat:34.6687,lng:135.5013},
+    {n:"Kuromon Ichiba",     h:"16:30",lat:34.6680,lng:135.5067},
+    {n:"Shinsekai",          h:"19:30",lat:34.6527,lng:135.5063},
   ]},
-  {d:"28 jun",wd:"Domingo",c:"osaka",title:"Excursión: Naoshima",pts:[
-    {n:"Chichu Art Museum", h:"10:00",lat:34.4617,lng:133.9939},
-    {n:"Art House Project", h:"12:30",lat:34.4664,lng:133.9995},
-    {n:"Benesse House",     h:"14:30",lat:34.4614,lng:134.0020},
+  {d:"28 jun",wd:"Domingo",c:"osaka",pts:[
+    {n:"Estación Osaka",     h:"07:30",lat:34.7025,lng:135.4959},
+    {n:"Chichu Art Museum",  h:"10:00",lat:34.4617,lng:133.9939},
+    {n:"Art House Project",  h:"12:30",lat:34.4664,lng:133.9995},
+    {n:"Benesse House",      h:"14:30",lat:34.4614,lng:134.0020},
   ]},
-  {d:"29 jun",wd:"Lunes",c:"osaka",title:"Hiroshima + Miyajima",pts:[
-    {n:"Parque Memorial",   h:"08:30",lat:34.3955,lng:132.4526},
-    {n:"Itsukushima",       h:"11:45",lat:34.2959,lng:132.3197},
-    {n:"Daisho-in",         h:"13:00",lat:34.2946,lng:132.3185},
+  {d:"29 jun",wd:"Lunes",c:"osaka",pts:[
+    {n:"Parque Memorial Paz",h:"08:30",lat:34.3955,lng:132.4526},
+    {n:"Itsukushima",        h:"11:45",lat:34.2959,lng:132.3197},
+    {n:"Daisho-in",          h:"13:00",lat:34.2946,lng:132.3185},
   ]},
-  {d:"30 jun",wd:"Martes",c:"takayama",title:"Osaka → Kanazawa",pts:[
-    {n:"Kenroku-en",        h:"09:30",lat:36.5616,lng:136.6618},
-    {n:"Nagamachi",         h:"12:00",lat:36.5573,lng:136.6567},
-    {n:"Omicho Market",     h:"13:00",lat:36.5751,lng:136.6603},
-    {n:"Higashi Chaya",     h:"14:30",lat:36.5700,lng:136.6673},
+  {d:"30 jun",wd:"Martes",c:"takayama",pts:[
+    {n:"Estación Kanazawa",  h:"09:15",lat:36.5780,lng:136.6484},
+    {n:"Kenroku-en",         h:"09:30",lat:36.5616,lng:136.6618},
+    {n:"Nagamachi",          h:"12:00",lat:36.5573,lng:136.6567},
+    {n:"Omicho Market",      h:"13:00",lat:36.5751,lng:136.6603},
+    {n:"Higashi Chaya",      h:"14:30",lat:36.5700,lng:136.6673},
+    {n:"Hida Takayama Onsen",h:"18:45",lat:36.1416,lng:137.2515},
   ]},
-  {d:"1 jul",wd:"Miércoles",c:"takayama",title:"Takayama + Shirakawa-go",pts:[
-    {n:"Sanmachi Suji",     h:"07:00",lat:36.1460,lng:137.2540},
-    {n:"Takayama Jinya",    h:"09:00",lat:36.1440,lng:137.2519},
-    {n:"Shirakawa-go",      h:"11:30",lat:36.2574,lng:136.9042},
+  {d:"1 jul",wd:"Miércoles",c:"takayama",pts:[
+    {n:"Sanmachi Suji",      h:"07:00",lat:36.1460,lng:137.2540},
+    {n:"Takayama Jinya",     h:"09:00",lat:36.1440,lng:137.2519},
+    {n:"Shirakawa-go",       h:"11:30",lat:36.2574,lng:136.9042},
   ]},
-  {d:"2 jul",wd:"Jueves",c:"tokyo2",title:"Asakusa · Skytree",pts:[
-    {n:"Senso-ji",          h:"16:00",lat:35.7148,lng:139.7967},
-    {n:"Tokyo Skytree",     h:"17:30",lat:35.7101,lng:139.8107},
+  {d:"2 jul",wd:"Jueves",c:"tokyo2",pts:[
+    {n:"Estación Tokyo",     h:"14:00",lat:35.6812,lng:139.7671},
+    {n:"Hotel JAL City Toyosu",h:"14:30",lat:35.6497,lng:139.7967},
+    {n:"Senso-ji",           h:"16:00",lat:35.7148,lng:139.7967},
+    {n:"Tokyo Skytree",      h:"17:30",lat:35.7101,lng:139.8107},
   ]},
-  {d:"3 jul",wd:"Viernes",c:"tokyo2",title:"Bahía · Akihabara · Shibuya",pts:[
-    {n:"Hamarikyu Gardens", h:"09:00",lat:35.6599,lng:139.7625},
-    {n:"Akihabara",         h:"10:30",lat:35.7022,lng:139.7742},
-    {n:"TeamLab Planets",   h:"16:00",lat:35.6476,lng:139.7958},
-    {n:"Shibuya Sky",       h:"19:00",lat:35.6585,lng:139.7014},
+  {d:"3 jul",wd:"Viernes",c:"tokyo2",pts:[
+    {n:"Hamarikyu Gardens",  h:"09:00",lat:35.6599,lng:139.7625},
+    {n:"Akihabara",          h:"10:30",lat:35.7022,lng:139.7742},
+    {n:"Hotel (dejar bolsas)",h:"14:30",lat:35.6497,lng:139.7967},
+    {n:"TeamLab Planets",    h:"16:00",lat:35.6476,lng:139.7958},
+    {n:"Shibuya Sky",        h:"19:00",lat:35.6585,lng:139.7014},
   ]},
-  {d:"4 jul",wd:"Sábado",c:"tokyo2",title:"Meiji · Harajuku · Shibuya · Shinjuku",pts:[
-    {n:"Meiji Jingu",       h:"09:00",lat:35.6763,lng:139.6993},
-    {n:"Harajuku",          h:"13:00",lat:35.6702,lng:139.7027},
-    {n:"Shibuya Crossing",  h:"15:30",lat:35.6595,lng:139.7005},
+  {d:"4 jul",wd:"Sábado",c:"tokyo2",pts:[
+    {n:"Meiji Jingu",        h:"09:00",lat:35.6763,lng:139.6993},
+    {n:"Harajuku",           h:"13:00",lat:35.6702,lng:139.7027},
+    {n:"Shibuya Crossing",   h:"15:30",lat:35.6595,lng:139.7005},
     {n:"Mirador Ayuntamiento",h:"18:00",lat:35.6896,lng:139.6917},
   ]},
-  {d:"5 jul",wd:"Domingo",c:"tokyo2",title:"Ueno · Vuelo a casa",pts:[
-    {n:"Parque Ueno",       h:"10:30",lat:35.7148,lng:139.7731},
+  {d:"5 jul",wd:"Domingo",c:"tokyo2",pts:[
+    {n:"Parque Ueno",        h:"10:30",lat:35.7148,lng:139.7731},
+    {n:"Narita Airport NRT", h:"14:30",lat:35.7720,lng:140.3929},
   ]},
 ];
-
-let leafletMaps={}; // store map instances
-
-// ── MAPS RENDER ──────────────────────────────────────────
-function renderMaps(){
-  const el=document.getElementById("content");
-  el.innerHTML=`<div style="background:#0D0D0B">
-    <div class="sec-title">Mapas por día</div>
-    <div class="sec-sub">${MAPDAYS.length} días · toca para contraer</div>
-    ${MAPDAYS.map((day,di)=>{
-      const T=TABS.find(t=>t.id===day.c)||{color:"#888"};
-      return `<div class="map-day-group">
-        <div class="map-day-header" onclick="toggleMapDay(${di})">
-          <div class="map-day-line" style="background:${T.color}"></div>
-          <div class="map-day-label">
-            <span class="map-day-num" style="color:${T.color}">${day.d}</span>
-            <span class="map-day-wd">${day.wd}</span>
-          </div>
-          <span class="map-day-sub">${day.pts.length} puntos</span>
-          <span class="map-day-arrow open" id="marr_${di}">▼</span>
-        </div>
-        <div class="map-day-body" id="mbody_${di}">
-          <div style="height:10px"></div>
-          <div class="map-wrap">
-            <div class="leaflet-map" id="lmap_${di}"></div>
-            <div class="map-legend">
-              ${day.pts.map((p,pi)=>`
-                <div class="map-leg-row">
-                  <div class="map-leg-dot" style="background:${T.color}"></div>
-                  <span>${p.n}</span>
-                  <span class="map-leg-time">${p.h}</span>
-                </div>`).join('')}
-            </div>
-          </div>
-        </div>
-      </div>`;
-    }).join('')}
-  </div>`;
-  // Init maps after DOM is ready
-  leafletMaps={};
-  setTimeout(()=>initAllMaps(),80);
-}
+let leafletMaps={};
 
 function initAllMaps(){
   if(typeof L==='undefined')return;
@@ -789,21 +898,19 @@ function togglePhotoDay(di){
 }
 
 function go(id){
-  tab=id;view="dias";
-  ['vd','vr','vf','vm'].forEach(b=>document.getElementById(b)&&document.getElementById(b).classList.remove('active'));
-  document.getElementById('vd').classList.add('active');
+  tab=id; showReservas=false;
   render();
 }
-function setView(v){
-  view=v;
-  document.getElementById('vd').classList.toggle('active',v==='dias');
-  document.getElementById('vr').classList.toggle('active',v==='reservas');
-  document.getElementById('vf').classList.toggle('active',v==='fotos');
-  document.getElementById('vm').classList.toggle('active',v==='mapas');
+function setSub(sv){
+  subview=sv; showReservas=false;
+  render();
+}
+function toggleReservas(){
+  showReservas=!showReservas;
   render();
 }
 function render(){
-  renderTabs();renderNav();renderContent();
+  renderNav(); renderSubTabs(); renderContent();
   document.getElementById("scroll-area").scrollTop=0;
 }
 render();
