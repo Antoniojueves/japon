@@ -18,11 +18,11 @@
   --text:#F0EDE6;--dim:rgba(240,237,230,.42);--faint:rgba(240,237,230,.22);
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;overflow:hidden}
-.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto}
-.header{flex-shrink:0;background:var(--bg);border-bottom:1px solid var(--border);padding-top:var(--st)}
-.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-.bot{flex-shrink:0;background:rgba(13,13,11,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding-bottom:var(--sb)}
+html,body{height:100%;background:#0D0D0B;color:var(--text);font-family:'DM Sans',system-ui,sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:#0D0D0B}
+.header{flex-shrink:0;background:#0D0D0B;border-bottom:1px solid var(--border);padding-top:var(--st)}
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#0D0D0B}
+.bot{flex-shrink:0;background:#0D0D0B;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding-bottom:var(--sb)}
 .header-top{display:flex;align-items:flex-start;justify-content:space-between;padding:13px 15px 0}
 .trip-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;line-height:1.1}
 .trip-dates{font-size:10px;color:var(--dim);margin-top:2px;letter-spacing:.07em;text-transform:uppercase}
@@ -32,7 +32,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .tab-scroll{display:flex;overflow-x:auto;gap:6px;padding:10px 14px 12px;scrollbar-width:none}
 .tab-btn{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:20px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;transition:all .22s;white-space:nowrap;color:rgba(240,237,230,.55);background:rgba(255,255,255,.07)}
 .tab-btn.active{color:#fff}
-.content{padding:14px 14px 20px}
+.content{padding:14px 14px 20px;background:#0D0D0B;min-height:100%}
 .city-intro{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
 .city-name{font-family:'Cormorant Garamond',serif;font-size:30px;font-style:italic;line-height:1}
 .city-dr{font-size:10px;color:var(--faint);margin-top:4px;letter-spacing:.05em;text-transform:uppercase}
@@ -87,6 +87,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .pmeta{display:flex;align-items:center;gap:7px;margin-top:8px}
 .pcity{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px}
 .pdate{font-size:10px;color:var(--faint)}
+.ptime{font-size:10px;color:var(--dim);font-weight:500}
+.photo-day-group{}
+.photo-day-header{display:flex;align-items:center;gap:10px;margin:18px 0 10px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.photo-day-header:first-child{margin-top:0}
+.photo-day-line{height:1.5px;width:14px;flex-shrink:0;border-radius:2px}
+.photo-day-label{display:flex;align-items:baseline;gap:7px;flex:1}
+.photo-day-num{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;line-height:1}
+.photo-day-wd{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.07em}
+.photo-day-count{font-size:10px;color:var(--faint);margin-left:auto}
+.photo-day-arrow{font-size:11px;color:var(--faint);transition:transform .25s;flex-shrink:0}
+.photo-day-arrow.open{transform:rotate(180deg)}
+.photo-day-body{overflow:hidden;transition:max-height .3s ease}
+.photo-day-body.collapsed{max-height:0!important}
 .loading-dots{display:flex;gap:4px;align-items:center;justify-content:center;height:100%}
 .loading-dots span{width:5px;height:5px;border-radius:50%;background:rgba(240,237,230,.25);animation:dot 1.2s infinite ease-in-out}
 .loading-dots span:nth-child(2){animation-delay:.2s}
@@ -318,36 +331,57 @@ const BOOKINGS=[
    note:"Hokuriku Shinkansen · cubierto por JR West Pass. Reservar asiento en taquilla JR para el tren de las 07:00."},
 ];
 
-// ── PHOTOS — usa títulos de Wikipedia para obtener imágenes reales ──
 const PHOTOS=[
-  {n:"Kokyo Gaien",         s:"Jardines del Palacio Imperial",          d:"23 jun",c:"tokyo1",e:"🌸", wiki:"Kōkyo_Gaien_National_Garden"},
-  {n:"Nishiki Market",      s:"El mercado cubierto de Kyoto",            d:"24 jun",c:"kyoto", e:"🍱", wiki:"Nishiki_Market"},
-  {n:"Castillo Nijo-jo",    s:"Los suelos «ruiseñor» de Kyoto",          d:"24 jun",c:"kyoto", e:"🏯", wiki:"Nijo_Castle"},
-  {n:"Fushimi Inari",       s:"Miles de torii naranjas en el bosque",    d:"25 jun",c:"kyoto", e:"⛩", wiki:"Fushimi_Inari-taisha"},
-  {n:"Kiyomizu-dera",       s:"El templo suspendido sobre el bosque",    d:"25 jun",c:"kyoto", e:"⛩", wiki:"Kiyomizu-dera"},
-  {n:"Kinkaku-ji",          s:"El Pabellón de Oro de Kyoto",             d:"25 jun",c:"kyoto", e:"✨", wiki:"Kinkaku-ji"},
-  {n:"Ryoan-ji",            s:"El jardín zen de las 15 piedras",         d:"25 jun",c:"kyoto", e:"🪨", wiki:"Ryōan-ji"},
-  {n:"Nara Park",           s:"Los ciervos sagrados de Nara",            d:"26 jun",c:"kyoto", e:"🦌", wiki:"Nara_Park"},
-  {n:"Todai-ji",            s:"El Gran Buda de bronce de 15 metros",     d:"26 jun",c:"kyoto", e:"🛕", wiki:"Tōdai-ji"},
-  {n:"Kasuga Taisha",       s:"3.000 linternas entre cedros milenarios", d:"26 jun",c:"kyoto", e:"⛩", wiki:"Kasuga-taisha"},
-  {n:"Byodo-in, Uji",       s:"El templo de la moneda de 10 yenes",     d:"26 jun",c:"kyoto", e:"🏛", wiki:"Byōdō-in"},
-  {n:"Castillo de Osaka",   s:"El corazón histórico de Osaka",           d:"27 jun",c:"osaka", e:"🏯", wiki:"Osaka_Castle"},
-  {n:"Dotonbori",           s:"El caos más divertido de Japón",          d:"27 jun",c:"osaka", e:"🦑", wiki:"Dōtonbori"},
-  {n:"Naoshima",            s:"La isla del arte contemporáneo",          d:"28 jun",c:"osaka", e:"🎨", wiki:"Naoshima,_Kagawa"},
-  {n:"Hiroshima — Memorial",s:"El símbolo más poderoso de la paz",       d:"29 jun",c:"osaka", e:"☮", wiki:"Hiroshima_Peace_Memorial"},
-  {n:"Itsukushima — Torii", s:"El santuario sobre el agua de Miyajima",  d:"29 jun",c:"osaka", e:"⛩", wiki:"Itsukushima_Shrine"},
-  {n:"Kenroku-en",          s:"Uno de los 3 jardines más bellos de Japón",d:"30 jun",c:"takayama",e:"🌿",wiki:"Kenroku-en"},
-  {n:"Nagamachi",           s:"El barrio samurai de Kanazawa",           d:"30 jun",c:"takayama",e:"🏘",wiki:"Nagamachi,_Kanazawa"},
-  {n:"Shirakawa-go",        s:"La aldea UNESCO con tejados de paja",     d:"1 jul", c:"takayama",e:"🏔",wiki:"Shirakawa-gō"},
-  {n:"Sanmachi Suji",       s:"El barrio histórico de Takayama",         d:"1 jul", c:"takayama",e:"🏘",wiki:"Sanmachi_Suji"},
-  {n:"Senso-ji",            s:"El templo más antiguo de Tokyo",          d:"2 jul", c:"tokyo2",e:"⛩", wiki:"Sensō-ji"},
-  {n:"Tokyo Skytree",       s:"450 metros sobre la metrópolis",          d:"2 jul", c:"tokyo2",e:"🗼", wiki:"Tokyo_Skytree"},
-  {n:"Hamarikyu Gardens",   s:"El jardín de los shogunes junto a la bahía",d:"3 jul",c:"tokyo2",e:"🌿",wiki:"Hamarikyu_Gardens"},
-  {n:"Akihabara",           s:"La meca del anime y la electrónica",      d:"3 jul", c:"tokyo2",e:"🎮", wiki:"Akihabara"},
-  {n:"Shibuya",             s:"El cruce y la terraza más famosos de Tokyo",d:"3 jul",c:"tokyo2",e:"🌆",wiki:"Shibuya"},
-  {n:"Meiji Jingu",         s:"El santuario en el bosque urbano",        d:"4 jul", c:"tokyo2",e:"⛩", wiki:"Meiji_Shrine"},
-  {n:"Harajuku",            s:"Cultura pop y diseño japonés",            d:"4 jul", c:"tokyo2",e:"🛍", wiki:"Harajuku"},
-  {n:"Parque Ueno",         s:"La despedida tranquila de Tokyo",         d:"5 jul", c:"tokyo2",e:"🌸", wiki:"Ueno_Park"},
+  // 23 jun
+  {n:"Kokyo Gaien",         s:"Jardines del Palacio Imperial",              d:"23 jun",wd:"Martes",   h:"18:00",c:"tokyo1",  e:"🌸",wiki:"Tokyo_Imperial_Palace"},
+  // 24 jun
+  {n:"Nishiki Market",      s:"El mercado cubierto de Kyoto",               d:"24 jun",wd:"Miércoles",h:"11:30",c:"kyoto",   e:"🍱",wiki:"Nishiki_Market"},
+  {n:"Castillo Nijo-jo",    s:"Los suelos «ruiseñor» de Kyoto",             d:"24 jun",wd:"Miércoles",h:"15:00",c:"kyoto",   e:"🏯",wiki:"Nijo_Castle"},
+  {n:"Gion",                s:"El barrio de las geishas y Pontocho",        d:"24 jun",wd:"Miércoles",h:"18:00",c:"kyoto",   e:"🏮",wiki:"Gion,_Kyoto"},
+  // 25 jun
+  {n:"Fushimi Inari",       s:"Miles de torii naranjas en el bosque",       d:"25 jun",wd:"Jueves",   h:"06:30",c:"kyoto",   e:"⛩",wiki:"Fushimi_Inari-taisha"},
+  {n:"Sanjusangendo",       s:"1.001 guerreros Kannon dorados",             d:"25 jun",wd:"Jueves",   h:"09:00",c:"kyoto",   e:"🛕",wiki:"Sanjusangen-do"},
+  {n:"Kiyomizu-dera",       s:"El templo suspendido sobre el bosque",       d:"25 jun",wd:"Jueves",   h:"11:00",c:"kyoto",   e:"⛩",wiki:"Kiyomizu-dera"},
+  {n:"Ninenzaka",           s:"Calles de piedra de Higashiyama",            d:"25 jun",wd:"Jueves",   h:"12:30",c:"kyoto",   e:"🏘",wiki:"Ninenzaka"},
+  {n:"Kinkaku-ji",          s:"El Pabellón de Oro de Kyoto",                d:"25 jun",wd:"Jueves",   h:"15:00",c:"kyoto",   e:"✨",wiki:"Kinkaku-ji"},
+  {n:"Ryoan-ji",            s:"El jardín zen de las 15 piedras",            d:"25 jun",wd:"Jueves",   h:"16:30",c:"kyoto",   e:"🪨",wiki:"Ryoan-ji"},
+  // 26 jun
+  {n:"Nara Park",           s:"Los ciervos sagrados de Nara",               d:"26 jun",wd:"Viernes",  h:"08:45",c:"kyoto",   e:"🦌",wiki:"Nara_Park"},
+  {n:"Todai-ji",            s:"El Gran Buda de bronce de 15 metros",        d:"26 jun",wd:"Viernes",  h:"09:30",c:"kyoto",   e:"🛕",wiki:"Todai-ji"},
+  {n:"Kasuga Taisha",       s:"3.000 linternas entre cedros milenarios",    d:"26 jun",wd:"Viernes",  h:"11:00",c:"kyoto",   e:"⛩",wiki:"Kasuga_Grand_Shrine"},
+  {n:"Byodo-in, Uji",       s:"El templo de la moneda de 10 yenes",        d:"26 jun",wd:"Viernes",  h:"15:45",c:"kyoto",   e:"🏛",wiki:"Byodo-in"},
+  // 27 jun
+  {n:"Castillo de Osaka",   s:"El corazón histórico de Osaka",              d:"27 jun",wd:"Sábado",   h:"10:00",c:"osaka",   e:"🏯",wiki:"Osaka_Castle"},
+  {n:"Dotonbori",           s:"El caos gastronómico de Osaka",              d:"27 jun",wd:"Sábado",   h:"14:00",c:"osaka",   e:"🦑",wiki:"Dotonbori"},
+  // 28 jun
+  {n:"Chichu Art Museum",   s:"Monet, Turrell y De Maria bajo tierra",      d:"28 jun",wd:"Domingo",  h:"10:00",c:"osaka",   e:"🎨",wiki:"Chichu_Art_Museum"},
+  {n:"Naoshima",            s:"La isla del arte contemporáneo",             d:"28 jun",wd:"Domingo",  h:"12:30",c:"osaka",   e:"🎨",wiki:"Naoshima,_Kagawa"},
+  // 29 jun
+  {n:"Hiroshima — Memorial",s:"El símbolo más poderoso de la paz",          d:"29 jun",wd:"Lunes",    h:"08:30",c:"osaka",   e:"☮",wiki:"Hiroshima_Peace_Memorial"},
+  {n:"Itsukushima — Torii", s:"El santuario sobre el agua de Miyajima",     d:"29 jun",wd:"Lunes",    h:"11:45",c:"osaka",   e:"⛩",wiki:"Itsukushima_Shrine"},
+  {n:"Templo Daisho-in",    s:"500 estatuas de monjes entre campanillas",   d:"29 jun",wd:"Lunes",    h:"13:00",c:"osaka",   e:"🛕",wiki:"Daisho-in"},
+  // 30 jun
+  {n:"Kenroku-en",          s:"Uno de los 3 jardines más bellos de Japón",  d:"30 jun",wd:"Martes",   h:"09:30",c:"takayama",e:"🌿",wiki:"Kenroku-en"},
+  {n:"Nagamachi",           s:"El barrio samurai de Kanazawa",              d:"30 jun",wd:"Martes",   h:"12:00",c:"takayama",e:"🏘",wiki:"Nagamachi,_Kanazawa"},
+  {n:"Higashi Chaya",       s:"El barrio de las geishas de Kanazawa",       d:"30 jun",wd:"Martes",   h:"14:30",c:"takayama",e:"🍵",wiki:"Higashi_Chaya"},
+  // 1 jul
+  {n:"Sanmachi Suji",       s:"El barrio histórico de Takayama",            d:"1 jul", wd:"Miércoles",h:"07:00",c:"takayama",e:"🏘",wiki:"Sanmachi_Suji"},
+  {n:"Shirakawa-go",        s:"La aldea UNESCO con tejados de paja",        d:"1 jul", wd:"Miércoles",h:"11:30",c:"takayama",e:"🏔",wiki:"Shirakawa-go"},
+  // 2 jul
+  {n:"Senso-ji",            s:"El templo más antiguo de Tokyo",             d:"2 jul", wd:"Jueves",   h:"16:00",c:"tokyo2",  e:"⛩",wiki:"Senso-ji"},
+  {n:"Tokyo Skytree",       s:"450 metros sobre la metrópolis",             d:"2 jul", wd:"Jueves",   h:"17:30",c:"tokyo2",  e:"🗼",wiki:"Tokyo_Skytree"},
+  // 3 jul
+  {n:"Hamarikyu Gardens",   s:"El jardín de los shogunes junto a la bahía", d:"3 jul", wd:"Viernes",  h:"09:00",c:"tokyo2",  e:"🌿",wiki:"Hamarikyu_Gardens"},
+  {n:"Akihabara",           s:"La meca del anime y la electrónica",         d:"3 jul", wd:"Viernes",  h:"10:30",c:"tokyo2",  e:"🎮",wiki:"Akihabara"},
+  {n:"TeamLab Planets",     s:"Arte inmersivo acuático en Toyosu",          d:"3 jul", wd:"Viernes",  h:"16:00",c:"tokyo2",  e:"🎨",wiki:"TeamLab_Planets_Tokyo_Museum"},
+  {n:"Shibuya Sky",         s:"La ciudad iluminada a 229 metros de altura", d:"3 jul", wd:"Viernes",  h:"19:00",c:"tokyo2",  e:"🌆",wiki:"Shibuya_Scramble_Square"},
+  // 4 jul
+  {n:"Meiji Shrine",        s:"El santuario en el bosque urbano",           d:"4 jul", wd:"Sábado",   h:"09:00",c:"tokyo2",  e:"⛩",wiki:"Meiji_Shrine"},
+  {n:"Harajuku",            s:"Cultura pop y boutiques de diseño japonés",  d:"4 jul", wd:"Sábado",   h:"13:00",c:"tokyo2",  e:"🛍",wiki:"Harajuku"},
+  {n:"Shibuya Crossing",    s:"El cruce más famoso del mundo",              d:"4 jul", wd:"Sábado",   h:"15:30",c:"tokyo2",  e:"🚦",wiki:"Shibuya_Station"},
+  {n:"Mirador Ayuntamiento",s:"Las mejores vistas gratuitas de Shinjuku",   d:"4 jul", wd:"Sábado",   h:"18:00",c:"tokyo2",  e:"🌃",wiki:"Tokyo_Metropolitan_Government_Building"},
+  // 5 jul
+  {n:"Parque Ueno",         s:"La despedida tranquila de Tokyo",            d:"5 jul", wd:"Domingo",  h:"10:30",c:"tokyo2",  e:"🌸",wiki:"Ueno_Park"},
 ];
 
 // ── STATE ────────────────────────────────────────────────
@@ -366,9 +400,10 @@ function toggle(id){
 }
 
 // ── WIKIPEDIA IMAGE FETCHER ──────────────────────────────
-// MediaWiki API with origin=* — explicit CORS support, more reliable than REST v1
+// MediaWiki API with origin=* — if no pageimage, falls back to image search
 async function fetchWikiThumb(wikiTitle, imgEl, fallbackEl){
   try{
+    // Primary: get page image for exact article
     const api='https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&pithumbsize=800&format=json&origin=*&titles='+encodeURIComponent(wikiTitle);
     const res=await fetch(api);
     if(!res.ok)return;
@@ -379,6 +414,19 @@ async function fetchWikiThumb(wikiTitle, imgEl, fallbackEl){
     if(page&&page.thumbnail&&page.thumbnail.source){
       imgEl.onload=()=>{imgEl.classList.add('loaded');fallbackEl.style.opacity='0';};
       imgEl.src=page.thumbnail.source;
+      return;
+    }
+    // Fallback: search for first article matching the title and get its image
+    const api2='https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&pithumbsize=800&format=json&origin=*&generator=search&gsrsearch='+encodeURIComponent(wikiTitle)+'&gsrlimit=1';
+    const res2=await fetch(api2);
+    if(!res2.ok)return;
+    const data2=await res2.json();
+    const pages2=data2.query&&data2.query.pages;
+    if(!pages2)return;
+    const page2=Object.values(pages2)[0];
+    if(page2&&page2.thumbnail&&page2.thumbnail.source){
+      imgEl.onload=()=>{imgEl.classList.add('loaded');fallbackEl.style.opacity='0';};
+      imgEl.src=page2.thumbnail.source;
     }
   }catch(e){/* fallback emoji stays */}
 }
@@ -403,32 +451,53 @@ function renderContent(){
 
   // ── FOTOS ──
   if(view==="fotos"){
-    el.innerHTML=`
-      <div>
-        <div class="sec-title">Lugares del viaje</div>
-        <div class="sec-sub">En orden de visita · ${PHOTOS.length} lugares</div>
-        ${PHOTOS.map((p,i)=>{
-          const T=TABS.find(t=>t.id===p.c)||{color:"#888",label:"—"};
-          return `<div class="photo-card">
-            <div class="piw">
-              <div class="pif" id="pif_${i}">${p.e}</div>
-              <img class="pimg" id="pimg_${i}" alt="${p.n}">
+    const dayKeys=[...new Set(PHOTOS.map(p=>p.d))];
+    let html=`<div style="background:#0D0D0B">
+      <div class="sec-title">Lugares del viaje</div>
+      <div class="sec-sub">${PHOTOS.length} lugares · toca un día para contraer</div>`;
+    dayKeys.forEach((day,di)=>{
+      const dayPhotos=PHOTOS.map((p,i)=>({...p,gi:i})).filter(p=>p.d===day);
+      const T=TABS.find(t=>t.id===dayPhotos[0].c)||{color:"#888"};
+      const bodyH=dayPhotos.length*230; // approx height for animation
+      html+=`
+        <div class="photo-day-group">
+          <div class="photo-day-header" onclick="togglePhotoDay(${di})">
+            <div class="photo-day-line" style="background:${T.color}"></div>
+            <div class="photo-day-label">
+              <span class="photo-day-num" style="color:${T.color}">${day}</span>
+              <span class="photo-day-wd">${dayPhotos[0].wd}</span>
             </div>
-            <div class="pinfo">
-              <div class="pname">${p.n}</div>
-              <div class="psub">${p.s}</div>
-              <div class="pmeta">
-                <span class="pcity" style="background:${T.color}22;color:${T.color};border:1px solid ${T.color}44">${T.label}</span>
-                <span class="pdate">${p.d}</span>
-              </div>
-            </div>
-          </div>`;}).join("")}
-      </div>`;
-    // Load images from Wikipedia API after render
+            <span class="photo-day-count">${dayPhotos.length} lugares</span>
+            <span class="photo-day-arrow open" id="parr_${di}">▼</span>
+          </div>
+          <div class="photo-day-body" id="pbody_${di}" style="max-height:${bodyH}px">
+            ${dayPhotos.map(p=>{
+              const Tc=TABS.find(t=>t.id===p.c)||{color:"#888",label:"—"};
+              return `<div class="photo-card">
+                <div class="piw">
+                  <div class="pif" id="pif_${p.gi}">${p.e}</div>
+                  <img class="pimg" id="pimg_${p.gi}" alt="${p.n}">
+                </div>
+                <div class="pinfo">
+                  <div class="pname">${p.n}</div>
+                  <div class="psub">${p.s}</div>
+                  <div class="pmeta">
+                    <span class="pcity" style="background:${Tc.color}22;color:${Tc.color};border:1px solid ${Tc.color}44">${Tc.label}</span>
+                    <span class="pdate">${p.d}</span>
+                    <span class="ptime">🕐 ${p.h}</span>
+                  </div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    });
+    html+='</div>';
+    el.innerHTML=html;
     PHOTOS.forEach((p,i)=>{
       const imgEl=document.getElementById('pimg_'+i);
       const fallEl=document.getElementById('pif_'+i);
-      if(imgEl && fallEl) fetchWikiThumb(p.wiki, imgEl, fallEl);
+      if(imgEl&&fallEl) fetchWikiThumb(p.wiki,imgEl,fallEl);
     });
     return;
   }
@@ -490,6 +559,24 @@ function renderContent(){
             </div>`).join('')}
         </div>
       </div>`).join('')}`;
+}
+
+function togglePhotoDay(di){
+  const body=document.getElementById('pbody_'+di);
+  const arr=document.getElementById('parr_'+di);
+  if(!body)return;
+  const collapsed=body.classList.contains('collapsed');
+  if(collapsed){
+    body.style.maxHeight=body.scrollHeight+'px';
+    body.classList.remove('collapsed');
+    arr&&arr.classList.add('open');
+  } else {
+    body.style.maxHeight=body.scrollHeight+'px';
+    requestAnimationFrame(()=>{
+      body.classList.add('collapsed');
+      arr&&arr.classList.remove('open');
+    });
+  }
 }
 
 function go(id){
